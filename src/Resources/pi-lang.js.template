@@ -96,6 +96,9 @@
     }
     var lead = (v.match(/^\s*/) || [''])[0];
     var tail = (v.match(/\s*$/) || [''])[0];
+    // 原文常用 &nbsp; 占位（如"Local block number:&nbsp;&nbsp;"），翻成中文后会把后面的
+    // 数字推得很远、两行对不齐；含 &nbsp; 的尾部空白统一压成一个普通空格
+    if (tail.indexOf('\u00a0') >= 0) tail = ' ';
     var next = lead + t + tail;
     n.nodeValue = next;
     lastValue.set(n, next);
