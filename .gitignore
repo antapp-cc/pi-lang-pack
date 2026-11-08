@@ -1,0 +1,29 @@
+# 构建产物
+src/bin/
+src/obj/
+dist/
+*.pdb
+*.user
+
+# 发布出来的程序（通过 GitHub Releases 分发，不进仓库）
+Pi多语言包.exe
+依赖运行时版/
+服务器更新文件/PiLang.exe
+*.old
+
+# 运行/测试残留
+_pi_*//
+PiLang.log
+config.json
+*.tmp
+
+# 从官方程序提取的中间数据/源码映射（版权归官方，不进公开仓库）
+tools/strings/renderer.js.map
+tools/strings/runtime-miss.json
+tools/strings/runtime-texts.json
+tools/strings/ports-texts.json
+tools/strings/ports-texts2.json
+tools/strings/all.json
+tools/strings/batch-*.json
+tools/strings/zh-part-*.json
+notifications.json

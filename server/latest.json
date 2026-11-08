@@ -1,0 +1,12 @@
+{
+  "app": {
+    "url": "https://github.com/antapp-cc/pi-lang-pack/releases/download/v1.0.1/PiLang.exe",
+    "sha256": "098abcbf01582687def7ad47adbff900bd68d83b8d39895cf5064177856656d2",
+    "version": "1.0.1"
+  },
+  "lang": {
+    "url": "https://raw.githubusercontent.com/antapp-cc/pi-lang-pack/main/server/zh-CN.json",
+    "sha256": "a97503b8c0349e8a7ab9b7e44858a7f314d3f1d033450b1426b575ab7bd6864b",
+    "version": "0.6.4"
+  }
+}
