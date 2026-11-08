@@ -642,7 +642,8 @@
     "dead": "已失效",
     "removing": "移除中",
     "To test your ports from the internet we need them free, so your node stops for a minute or two and then starts again on its own. Remote access is unaffected — it does not use these ports.": "为了从互联网测试你的端口，需要这些端口空闲，所以你的节点会停止一两分钟，然后自动重新启动。远程访问不受影响——它不使用这些端口。",
-    "Your node still works, but other nodes may not be able to reach it. SoloHost Remote Access is unaffected.": "你的节点仍在运行，但其他节点可能无法访问它。SoloHost 远程访问不受影响。"
+    "Your node still works, but other nodes may not be able to reach it. SoloHost Remote Access is unaffected.": "你的节点仍在运行，但其他节点可能无法访问它。SoloHost 远程访问不受影响。",
+    "Make sure your port configuration is correct": "请确认你的端口配置正确"
   },
   "danger": [
     "Remove all blockchain data",
@@ -810,6 +811,10 @@
     {
       "pattern": "^from (\\d{4}-\\d{2}-\\d{2}) to (\\d{4}-\\d{2}-\\d{2})$",
       "replacement": "从 $1 到 $2"
+    },
+    {
+      "pattern": "^Currently supporting (\\d+) other nodes$",
+      "replacement": "当前支撑 $1 个其他节点"
     }
   ]
 }
