@@ -103,10 +103,28 @@ internal sealed class PiLangApp : ApplicationContext
         if (_checkingUpdate) return;
         _checkingUpdate = true;
         _updateItem.Enabled = false;
+        _updateItem.Text = "检查更新（进行中…）";
+        if (manual)
+            _icon.ShowBalloonTip(4000, "Pi 多语言包", "正在检查更新…", ToolTipIcon.Info);
         try
         {
             _cfg = ConfigStore.Load();
-            var result = await UpdateService.CheckAndApplyAsync(_cfg);
+
+            // 检查/下载的实时进度：托盘图标悬停文字会更新（如"正在下载词表 45%"）
+            var progress = new Progress<UpdateProgress>(p =>
+            {
+                try
+                {
+                    var text = "Pi 多语言包：" + p.Stage;
+                    if (p.Total > 0) text += " " + (p.Done * 100 / p.Total) + "%";
+                    _icon.Text = text.Length > 63 ? text.Substring(0, 63) : text;
+                }
+                catch
+                {
+                }
+            });
+
+            var result = await UpdateService.CheckAndApplyAsync(_cfg, progress);
             if (manual)
             {
                 MessageBox.Show(result.Message, "Pi 多语言包", MessageBoxButtons.OK,
@@ -137,6 +155,8 @@ internal sealed class PiLangApp : ApplicationContext
         {
             _checkingUpdate = false;
             _updateItem.Enabled = true;
+            _updateItem.Text = "检查更新";
+            RefreshMenu();
         }
     }
 

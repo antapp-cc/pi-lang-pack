@@ -39,6 +39,13 @@ internal sealed class UpdateResult
     public static UpdateResult Fail(string msg) => new() { Ok = false, Message = msg };
 }
 
+internal sealed class UpdateProgress
+{
+    public string Stage { get; set; } = "";
+    public long Done { get; set; }
+    public long Total { get; set; }
+}
+
 /// <summary>
 /// 在线更新：拉最新清单 → 校验 SHA256 → 更新词表（自动重打）或替换程序本体（重启）。
 /// 网络容错：清单源支持多个（GitHub raw 自动追加 jsDelivr 镜像），下载失败重试；
@@ -59,8 +66,9 @@ internal static class UpdateService
 
     public static string UpdateDir => Path.Combine(ConfigStore.ConfigDir, "update");
 
-    public static async Task<UpdateResult> CheckAndApplyAsync(Config cfg)
+    public static async Task<UpdateResult> CheckAndApplyAsync(Config cfg, IProgress<UpdateProgress> progress = null)
     {
+        progress?.Report(new UpdateProgress { Stage = "正在检查更新…" });
         var sources = BuildSources(cfg.UpdateUrl);
         if (sources.Count == 0) return UpdateResult.Fail("没有配置更新地址");
 
@@ -91,7 +99,7 @@ internal static class UpdateService
         {
             if (manifest.Lang != null && !string.IsNullOrWhiteSpace(manifest.Lang.Url))
             {
-                if (await ApplyLangAsync(manifest.Lang, cfg))
+                if (await ApplyLangAsync(manifest.Lang, cfg, progress))
                 {
                     changed.Add("词表已更新");
                     Log.Write("在线更新：词表已更新到 " + manifest.Lang.Version);
@@ -102,7 +110,7 @@ internal static class UpdateService
             if (manifest.App != null && !string.IsNullOrWhiteSpace(manifest.App.Url) &&
                 IsNewer(manifest.App.Version, CurrentAppVersion))
             {
-                if (await PrepareAppUpdateAsync(manifest.App))
+                if (await PrepareAppUpdateAsync(manifest.App, progress))
                 {
                     appUpdated = true;
                     changed.Add("程序已更新到 " + manifest.App.Version);
@@ -130,9 +138,9 @@ internal static class UpdateService
         }
     }
 
-    private static async Task<bool> ApplyLangAsync(LangUpdateInfo info, Config cfg)
+    private static async Task<bool> ApplyLangAsync(LangUpdateInfo info, Config cfg, IProgress<UpdateProgress> progress)
     {
-        var bytes = await DownloadWithRetryAsync(info.Url);
+        var bytes = await DownloadWithRetryAsync(info.Url, "正在下载词表", progress);
         VerifySha256(bytes, info.Sha256);
 
         var path = Path.Combine(ConfigStore.LangDir, "zh-CN.json");
@@ -160,9 +168,9 @@ internal static class UpdateService
         return true;
     }
 
-    private static async Task<bool> PrepareAppUpdateAsync(AppUpdateInfo info)
+    private static async Task<bool> PrepareAppUpdateAsync(AppUpdateInfo info, IProgress<UpdateProgress> progress)
     {
-        var bytes = await DownloadWithRetryAsync(info.Url);
+        var bytes = await DownloadWithRetryAsync(info.Url, "正在下载程序", progress);
         VerifySha256(bytes, info.Sha256);
 
         Directory.CreateDirectory(UpdateDir);
@@ -183,14 +191,28 @@ internal static class UpdateService
         return true;
     }
 
-    private static async Task<byte[]> DownloadWithRetryAsync(string url)
+    private static async Task<byte[]> DownloadWithRetryAsync(string url, string stage, IProgress<UpdateProgress> progress)
     {
         Exception last = null;
         for (int attempt = 1; attempt <= 3; attempt++)
         {
             try
             {
-                return await FileHttp.GetByteArrayAsync(url);
+                using var response = await FileHttp.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+                response.EnsureSuccessStatusCode();
+                var total = response.Content.Headers.ContentLength ?? 0;
+                await using var stream = await response.Content.ReadAsStreamAsync();
+                using var ms = new MemoryStream();
+                var buffer = new byte[81920];
+                long done = 0;
+                int read;
+                while ((read = await stream.ReadAsync(buffer)) > 0)
+                {
+                    ms.Write(buffer, 0, read);
+                    done += read;
+                    progress?.Report(new UpdateProgress { Stage = stage, Done = done, Total = total });
+                }
+                return ms.ToArray();
             }
             catch (Exception ex)
             {
@@ -297,3 +319,4 @@ internal static class UpdateService
         return DateTime.UtcNow - last > TimeSpan.FromHours(6);
     }
 }
+
