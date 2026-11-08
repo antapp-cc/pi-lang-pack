@@ -79,7 +79,7 @@ internal static class UpdateService
             if (!IsAllowedUrl(source)) { lastError = new InvalidDataException("更新地址必须是 https：" + source); continue; }
             try
             {
-                var json = await Http.GetStringAsync(source);
+                var json = await Http.GetStringAsync(AppendQuery(source, "t=" + DateTimeOffset.UtcNow.ToUnixTimeSeconds()));
                 manifest = JsonSerializer.Deserialize<UpdateManifest>(json, Json);
                 if (manifest != null) break;
             }
@@ -140,7 +140,7 @@ internal static class UpdateService
 
     private static async Task<bool> ApplyLangAsync(LangUpdateInfo info, Config cfg, IProgress<UpdateProgress> progress)
     {
-        var bytes = await DownloadWithRetryAsync(info.Url, "正在下载词表", progress);
+        var bytes = await DownloadVerifiedAsync(AppendQuery(info.Url, "v=" + ShortHash(info.Sha256)), info.Sha256, "正在下载词表", progress);
         VerifySha256(bytes, info.Sha256);
 
         var path = Path.Combine(ConfigStore.LangDir, "zh-CN.json");
@@ -170,7 +170,7 @@ internal static class UpdateService
 
     private static async Task<bool> PrepareAppUpdateAsync(AppUpdateInfo info, IProgress<UpdateProgress> progress)
     {
-        var bytes = await DownloadWithRetryAsync(info.Url, "正在下载程序", progress);
+        var bytes = await DownloadVerifiedAsync(AppendQuery(info.Url, "v=" + ShortHash(info.Sha256)), info.Sha256, "正在下载程序", progress);
         VerifySha256(bytes, info.Sha256);
 
         Directory.CreateDirectory(UpdateDir);
@@ -191,6 +191,35 @@ internal static class UpdateService
         return true;
     }
 
+    /// <summary>给 URL 追加参数（缓存破坏 / 版本区分）。</summary>
+    private static string AppendQuery(string url, string query) =>
+        url + (url.Contains('?') ? "&" : "?") + query;
+
+    private static string ShortHash(string sha) =>
+        string.IsNullOrWhiteSpace(sha) ? DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString() : sha.Substring(0, Math.Min(16, sha.Length));
+
+    /// <summary>
+    /// 下载并校验 SHA256。CDN 缓存不同步时（清单旧、文件新）会重试；
+    /// URL 里带版本参数后，同一版本的缓存不会串。
+    /// </summary>
+    private static async Task<byte[]> DownloadVerifiedAsync(string url, string expectedSha, string stage, IProgress<UpdateProgress> progress)
+    {
+        for (int attempt = 1; attempt <= 3; attempt++)
+        {
+            var bytes = await DownloadWithRetryAsync(url, stage, progress);
+            try
+            {
+                VerifySha256(bytes, expectedSha);
+                return bytes;
+            }
+            catch (InvalidDataException) when (attempt < 3)
+            {
+                Log.Write("SHA 校验不一致，重试下载：" + url);
+                await Task.Delay(3000);
+            }
+        }
+        throw new InvalidDataException("下载内容 SHA256 与清单不一致，已拒绝更新（缓存可能还没刷新生效，稍后再试）");
+    }
     private static async Task<byte[]> DownloadWithRetryAsync(string url, string stage, IProgress<UpdateProgress> progress)
     {
         Exception last = null;
@@ -319,4 +348,5 @@ internal static class UpdateService
         return DateTime.UtcNow - last > TimeSpan.FromHours(6);
     }
 }
+
 

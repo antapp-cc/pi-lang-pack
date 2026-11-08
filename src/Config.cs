@@ -30,7 +30,7 @@ internal sealed class Config
     public bool AutoStart { get; set; }
 
     /// <summary>在线更新清单地址（必须是 https；本地测试允许 http://localhost）。</summary>
-    public string UpdateUrl { get; set; } = "https://raw.githubusercontent.com/antapp-cc/pi-lang-pack/main/server/latest.json";
+    public string UpdateUrl { get; set; } = "https://pi.antapp.cc/pilang/latest.json;https://raw.githubusercontent.com/antapp-cc/pi-lang-pack/main/server/latest.json";
 
     /// <summary>是否自动检查更新（启动后和每 6 小时一次）。</summary>
     public bool AutoUpdate { get; set; } = true;
@@ -106,4 +106,5 @@ internal static class Log
         }
     }
 }
+
 

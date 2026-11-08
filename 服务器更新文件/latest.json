@@ -1,12 +1,12 @@
 {
   "lang": {
+    "sha256": "51f5ea79d03a0c137238e35a376bcd43c53d6ec5da2d13619e8685e91954380f",
     "version": "0.6.4",
-    "url": "https://pi.antapp.cc/pilang/zh-CN.json",
-    "sha256": "a97503b8c0349e8a7ab9b7e44858a7f314d3f1d033450b1426b575ab7bd6864b"
+    "url": "https://pi.antapp.cc/pilang/zh-CN.json"
   },
   "app": {
-    "version": "1.0.1",
-    "url": "https://pi.antapp.cc/pilang/PiLang.exe",
-    "sha256": "098abcbf01582687def7ad47adbff900bd68d83b8d39895cf5064177856656d2"
+    "sha256": "78dc2c55f8c8c54d23fecd6c409b24ee1640daa74511866241f7205291e1a3bf",
+    "version": "1.0.7",
+    "url": "https://pi.antapp.cc/pilang/PiLang.exe"
   }
 }
