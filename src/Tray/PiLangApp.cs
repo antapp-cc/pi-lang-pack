@@ -104,19 +104,28 @@ internal sealed class PiLangApp : ApplicationContext
         _checkingUpdate = true;
         _updateItem.Enabled = false;
         _updateItem.Text = "检查更新（进行中…）";
+
+        // 手动检查时弹一个小窗口，能看到当前阶段和下载进度；自动检查不打扰
+        UpdateStatusForm status = null;
         if (manual)
-            _icon.ShowBalloonTip(4000, "Pi 多语言包", "正在检查更新…", ToolTipIcon.Info);
+        {
+            status = new UpdateStatusForm();
+            status.Show();
+        }
+
+        UpdateResult result = null;
         try
         {
             _cfg = ConfigStore.Load();
 
-            // 检查/下载的实时进度：托盘图标悬停文字会更新（如"正在下载词表 45%"）
             var progress = new Progress<UpdateProgress>(p =>
             {
                 try
                 {
+                    var percent = p.Total > 0 ? (int)(p.Done * 100 / p.Total) : 0;
+                    status?.Report(p.Stage, percent);
                     var text = "Pi 多语言包：" + p.Stage;
-                    if (p.Total > 0) text += " " + (p.Done * 100 / p.Total) + "%";
+                    if (p.Total > 0) text += " " + percent + "%";
                     _icon.Text = text.Length > 63 ? text.Substring(0, 63) : text;
                 }
                 catch
@@ -124,39 +133,43 @@ internal sealed class PiLangApp : ApplicationContext
                 }
             });
 
-            var result = await UpdateService.CheckAndApplyAsync(_cfg, progress);
-            if (manual)
-            {
-                MessageBox.Show(result.Message, "Pi 多语言包", MessageBoxButtons.OK,
-                    result.Ok ? MessageBoxIcon.Information : MessageBoxIcon.Warning);
-            }
-            else if (!result.Ok)
-            {
-                Log.Write("自动检查更新：" + result.Message);
-            }
-
-            if (result.LangUpdated)
-            {
-                _cfg = ConfigStore.Load();
-                _state = PatchEngine.State(_cfg);
-                RefreshMenu();
-                _icon.ShowBalloonTip(6000, "Pi 多语言包",
-                    "词表已更新并重新汉化，重启 Pi Network 后生效。", ToolTipIcon.Info);
-            }
-
-            if (result.AppUpdated)
-            {
-                _icon.ShowBalloonTip(6000, "Pi 多语言包", "程序已更新，正在重启…", ToolTipIcon.Info);
-                await Task.Delay(1200);
-                ExitApp();
-            }
+            result = await UpdateService.CheckAndApplyAsync(_cfg, progress);
         }
         finally
         {
             _checkingUpdate = false;
             _updateItem.Enabled = true;
             _updateItem.Text = "检查更新";
+            try { status?.Close(); } catch { }
             RefreshMenu();
+        }
+
+        if (result == null) return;
+
+        if (manual)
+        {
+            MessageBox.Show(result.Message, "Pi 多语言包", MessageBoxButtons.OK,
+                result.Ok ? MessageBoxIcon.Information : MessageBoxIcon.Warning);
+        }
+        else if (!result.Ok)
+        {
+            Log.Write("自动检查更新：" + result.Message);
+        }
+
+        if (result.LangUpdated)
+        {
+            _cfg = ConfigStore.Load();
+            _state = PatchEngine.State(_cfg);
+            RefreshMenu();
+            _icon.ShowBalloonTip(6000, "Pi 多语言包",
+                "词表已更新并重新汉化，重启 Pi Network 后生效。", ToolTipIcon.Info);
+        }
+
+        if (result.AppUpdated)
+        {
+            _icon.ShowBalloonTip(6000, "Pi 多语言包", "程序已更新，正在重启…", ToolTipIcon.Info);
+            await Task.Delay(1200);
+            ExitApp();
         }
     }
 

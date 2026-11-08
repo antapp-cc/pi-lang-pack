@@ -69,24 +69,26 @@ internal static class UpdateService
     public static async Task<UpdateResult> CheckAndApplyAsync(Config cfg, IProgress<UpdateProgress> progress = null)
     {
         progress?.Report(new UpdateProgress { Stage = "正在检查更新…" });
-        var sources = BuildSources(cfg.UpdateUrl);
-        if (sources.Count == 0) return UpdateResult.Fail("没有配置更新地址");
+        var sources = BuildSources(cfg.UpdateUrl).Where(IsAllowedUrl).ToList();
+        if (sources.Count == 0) return UpdateResult.Fail("没有配置有效的更新地址（必须是 https）");
 
+        // 多个源并行请求，谁先拿到清单用谁，避免串行等超时（最坏要等两轮 45 秒）
+        var pending = sources.Select(s => FetchManifestAsync(s)).ToList();
         UpdateManifest manifest = null;
         Exception lastError = null;
-        foreach (var source in sources)
+        while (pending.Count > 0 && manifest == null)
         {
-            if (!IsAllowedUrl(source)) { lastError = new InvalidDataException("更新地址必须是 https：" + source); continue; }
+            var completed = await Task.WhenAny(pending);
+            pending.Remove(completed);
             try
             {
-                var json = await Http.GetStringAsync(AppendQuery(source, "t=" + DateTimeOffset.UtcNow.ToUnixTimeSeconds()));
-                manifest = JsonSerializer.Deserialize<UpdateManifest>(json, Json);
-                if (manifest != null) break;
+                var m = await completed;
+                if (m != null) manifest = m;
             }
             catch (Exception ex)
             {
                 lastError = ex;
-                Log.Write("更新源失败，尝试下一个：" + source + " -> " + ex.Message);
+                Log.Write("更新源失败：" + ex.Message);
             }
         }
 
@@ -138,6 +140,11 @@ internal static class UpdateService
         }
     }
 
+    private static async Task<UpdateManifest> FetchManifestAsync(string source)
+    {
+        var json = await Http.GetStringAsync(AppendQuery(source, "t=" + DateTimeOffset.UtcNow.ToUnixTimeSeconds()));
+        return JsonSerializer.Deserialize<UpdateManifest>(json, Json);
+    }
     private static async Task<bool> ApplyLangAsync(LangUpdateInfo info, Config cfg, IProgress<UpdateProgress> progress)
     {
         var bytes = await DownloadVerifiedAsync(AppendQuery(info.Url, "v=" + ShortHash(info.Sha256)), info.Sha256, "正在下载词表", progress);
@@ -348,5 +355,6 @@ internal static class UpdateService
         return DateTime.UtcNow - last > TimeSpan.FromHours(6);
     }
 }
+
 
 
