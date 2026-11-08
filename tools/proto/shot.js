@@ -2,7 +2,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const PORT = 9339;
+const PORT = 9343;
 const OUT = 'C:\\Users\\Administrator\\Desktop\\Pi多语言包\\docs\\screenshots';
 
 async function waitTarget(timeoutMs) {
@@ -53,5 +53,6 @@ function send(wsUrl, method, params) {
     console.log('  截图:', name + '.png');
   }
 })().then(() => process.exit(0)).catch(e => { console.error('FAIL:', e.message); process.exit(1); });
+
 
 
