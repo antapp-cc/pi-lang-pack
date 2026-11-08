@@ -43,7 +43,7 @@ dotnet publish -c Release -o ..\dist\framework -p:PublishSingleFile=false
 - 程序更新：下载 → SHA256 校验 → 退出 → 替换 → 重启（旧版备份为 `.old`）；
 - 词表更新：下载 → 校验 → 重新汉化（Pi Node 运行中会等它退出后自动补）。
 
-更新地址在 `%APPDATA%\PiLang\config.json` 的 `updateUrl` 字段。
+更新地址默认是 GitHub 上的清单：`https://raw.githubusercontent.com/antapp-cc/pi-lang-pack/main/server/latest.json`（可在 `%APPDATA%\\PiLang\\config.json` 的 `updateUrl` 改成自己的服务器，GitHub 访问不了时用）。
 
 ## 原理
 
@@ -54,3 +54,4 @@ dotnet publish -c Release -o ..\dist\framework -p:PublishSingleFile=false
 3. 替换 `dist/renderer/renderer.js` 里 `window.confirm` 的消息字符串（原生确认弹窗）。
 
 安装前备份原版 asar，还原时整包恢复。
+

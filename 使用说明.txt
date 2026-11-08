@@ -66,12 +66,13 @@ Pi Network 必须完全退出（托盘图标也退掉）。正在运行时点"�
 【在线更新】
 程序会自动检查更新：启动后约 15 秒检查一次，之后每 6 小时一次；右键托盘
 「检查更新」也可以手动查。更新源地址在 %APPDATA%\PiLang\config.json 的
-updateUrl 字段，默认 https://pi.antapp.cc/pilang/latest.json。
+updateUrl 字段，默认 https://raw.githubusercontent.com/antapp-cc/pi-lang-pack/main/server/latest.json。
 - 词表更新：自动下载并重新汉化（如果 Pi Network 正开着，会等你关闭后自动补上）；
 - 程序更新：自动下载、退出、替换、重启；旧版本保留为 程序名.exe.old。
 - 安全：只接受 https 地址（本地测试允许 localhost），下载内容必须与清单里的
   SHA256 一致，不一致直接拒绝更新。
 - 服务器端目录需要三个文件：latest.json、zh-CN.json、PiLang.exe
-  （就是本文件夹里「服务器更新文件」那一套，传上去即可）。
+  （GitHub 仓库的 Releases 和 server 目录维护，详见 README）。
 - 关掉自动检查：把 config.json 的 autoUpdate 改成 false。
+
 
