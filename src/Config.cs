@@ -40,6 +40,12 @@ internal sealed class Config
 
     /// <summary>词表已更新但还没打补丁（等 Pi Node 退出后由守护完成）。</summary>
     public bool PendingRepatch { get; set; }
+
+    /// <summary>
+    /// 上次应用词表时清单里的更新时间。GitHub raw 有 CDN 缓存，可能先刷到旧清单，
+    /// 用这个时间挡住"旧清单把新词表降级"的循环。
+    /// </summary>
+    public string LastLangUpdatedAt { get; set; } = "";
 }
 
 internal static class ConfigStore

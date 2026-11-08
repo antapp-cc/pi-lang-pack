@@ -21,6 +21,7 @@ internal sealed class AppUpdateInfo
     public string Version { get; set; } = "";
     public string Url { get; set; } = "";
     public string Sha256 { get; set; } = "";
+    public string UpdatedAt { get; set; } = "";
 }
 
 internal sealed class LangUpdateInfo
@@ -28,6 +29,7 @@ internal sealed class LangUpdateInfo
     public string Version { get; set; } = "";
     public string Url { get; set; } = "";
     public string Sha256 { get; set; } = "";
+    public string UpdatedAt { get; set; } = "";
 }
 
 internal sealed class UpdateResult
@@ -146,20 +148,34 @@ internal static class UpdateService
     }
     private static async Task<bool> ApplyLangAsync(LangUpdateInfo info, Config cfg, IProgress<UpdateProgress> progress)
     {
-        var bytes = await DownloadVerifiedAsync(AppendQuery(info.Url, "v=" + ShortHash(info.Sha256)), info.Sha256, "正在下载词表", progress);
-        VerifySha256(bytes, info.Sha256);
-
         var path = Path.Combine(ConfigStore.LangDir, "zh-CN.json");
-        if (File.Exists(path))
+
+        // 本地已经和清单一致，不用下载
+        if (File.Exists(path) && !string.IsNullOrWhiteSpace(info.Sha256))
         {
-            var current = File.ReadAllBytes(path);
-            if (current.Length == bytes.Length &&
-                Convert.ToHexString(SHA256.HashData(current)).Equals(info.Sha256, StringComparison.OrdinalIgnoreCase))
+            var localSha = Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(path)));
+            if (localSha.Equals(info.Sha256, StringComparison.OrdinalIgnoreCase))
                 return false;
         }
 
+        // 防降级：GitHub raw 的 CDN 缓存可能先刷到旧清单，旧清单会把新词表覆盖回去。
+        // 清单里带 updatedAt，只接受比"上次应用时间"更新的清单。
+        if (!string.IsNullOrWhiteSpace(info.UpdatedAt) &&
+            !string.IsNullOrWhiteSpace(cfg.LastLangUpdatedAt) &&
+            DateTime.TryParse(info.UpdatedAt, null, System.Globalization.DateTimeStyles.RoundtripKind, out var remoteAt) &&
+            DateTime.TryParse(cfg.LastLangUpdatedAt, null, System.Globalization.DateTimeStyles.RoundtripKind, out var lastAt) &&
+            remoteAt <= lastAt)
+        {
+            Log.Write("清单里的词表比已应用的旧（CDN 缓存未刷新），跳过降级");
+            return false;
+        }
+
+        var bytes = await DownloadVerifiedAsync(AppendQuery(info.Url, "v=" + ShortHash(info.Sha256)), info.Sha256, "正在下载词表", progress);
+        VerifySha256(bytes, info.Sha256);
+
         Directory.CreateDirectory(ConfigStore.LangDir);
         File.WriteAllBytes(path, bytes);
+        cfg.LastLangUpdatedAt = info.UpdatedAt;
 
         // 词表换了，已汉化的界面要重打一次；Pi Node 在跑就等它退出（守护负责）
         cfg.PendingRepatch = true;
@@ -354,6 +370,7 @@ internal static class UpdateService
         return DateTime.UtcNow - last > TimeSpan.FromHours(6);
     }
 }
+
 
 
 
