@@ -625,7 +625,10 @@
     "Your router can open these ports, but the automatic feature (called": "你的路由器可以打开这些端口，但自动功能（称为",
     "Your router didn’t answer for this one. This is usually temporary — try again in a moment.": "你的路由器对此端口没有响应。这通常是暂时的——请稍后重试。",
     "Your router is connected to another router or modem, so opening ports": "你的路由器连接着另一台路由器或调制解调器，因此在此打开端口",
-    "Your router needs a manual step": "你的路由器需要手动操作"
+    "Your router needs a manual step": "你的路由器需要手动操作",
+    "Local block number:": "本地区块号：",
+    "Latest block number:": "最新区块号：",
+    "block number:": "区块号："
   },
   "danger": [
     "Remove all blockchain data",
@@ -685,6 +688,26 @@
     {
       "pattern": "^(\\d+) (?:hour|hours)$",
       "replacement": "$1 小时"
+    },
+    {
+      "pattern": "^Your computer is syncing with the blockchain \\(it may take hours\\)$",
+      "replacement": "你的计算机正在与区块链同步（可能需要几个小时）"
+    },
+    {
+      "pattern": "^Your computer is syncing with the blockchain \\(it may take hours\\) Catching up to ledger (\\d+): downloading ledger files (\\d+)/(\\d+) \\((\\d+)%\\)$",
+      "replacement": "你的计算机正在与区块链同步（可能需要几个小时）正在追赶账本 $1：下载账本文件 $2/$3（已完成 $4%）"
+    },
+    {
+      "pattern": "^Your computer is syncing with the blockchain \\(it may take hours\\) Catching up to ledger (\\d+): Download & apply checkpoints: num checkpoints left to apply:(\\d+) \\((\\d+)% done\\)$",
+      "replacement": "你的计算机正在与区块链同步（可能需要几个小时）正在追赶账本 $1：下载并应用检查点，剩余待应用检查点：$2（已完成 $3%）"
+    },
+    {
+      "pattern": "^Your computer is syncing with the blockchain \\(it may take hours\\) Catching up to ledger (\\d+): (Applying buckets.*)$",
+      "replacement": "你的计算机正在与区块链同步（可能需要几个小时）正在追赶账本 $1：$2"
+    },
+    {
+      "pattern": "^Your computer is syncing with the blockchain \\(it may take hours\\) Catching up to ledger (\\d+): (.*)$",
+      "replacement": "你的计算机正在与区块链同步（可能需要几个小时）正在追赶账本 $1：$2"
     }
   ]
 }
