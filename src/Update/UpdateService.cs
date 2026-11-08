@@ -41,11 +41,17 @@ internal sealed class UpdateResult
 
 /// <summary>
 /// 在线更新：拉最新清单 → 校验 SHA256 → 更新词表（自动重打）或替换程序本体（重启）。
-/// 只信任 https 地址；下载的内容必须和清单里的 SHA256 一致，否则拒绝。
+/// 网络容错：清单源支持多个（GitHub raw 自动追加 jsDelivr 镜像），下载失败重试；
+/// 只信任 https 地址，下载内容必须和清单里的 SHA256 一致。
 /// </summary>
 internal static class UpdateService
 {
-    private static readonly HttpClient Http = new() { Timeout = TimeSpan.FromSeconds(20) };
+    /// <summary>清单请求：超时短一点，失败好回退到下一个源。</summary>
+    private static readonly HttpClient Http = new() { Timeout = TimeSpan.FromSeconds(45) };
+
+    /// <summary>文件下载：程序本体 50MB，慢网络要给足时间。</summary>
+    private static readonly HttpClient FileHttp = new() { Timeout = TimeSpan.FromMinutes(10) };
+
     private static readonly JsonSerializerOptions Json = new() { PropertyNameCaseInsensitive = true };
 
     public static string CurrentAppVersion =>
@@ -55,17 +61,34 @@ internal static class UpdateService
 
     public static async Task<UpdateResult> CheckAndApplyAsync(Config cfg)
     {
+        var sources = BuildSources(cfg.UpdateUrl);
+        if (sources.Count == 0) return UpdateResult.Fail("没有配置更新地址");
+
+        UpdateManifest manifest = null;
+        Exception lastError = null;
+        foreach (var source in sources)
+        {
+            if (!IsAllowedUrl(source)) { lastError = new InvalidDataException("更新地址必须是 https：" + source); continue; }
+            try
+            {
+                var json = await Http.GetStringAsync(source);
+                manifest = JsonSerializer.Deserialize<UpdateManifest>(json, Json);
+                if (manifest != null) break;
+            }
+            catch (Exception ex)
+            {
+                lastError = ex;
+                Log.Write("更新源失败，尝试下一个：" + source + " -> " + ex.Message);
+            }
+        }
+
+        if (manifest == null)
+            return UpdateResult.Fail("无法连接更新服务器（网络超时或受限）。" + FriendlyError(lastError));
+
+        var changed = new List<string>();
+
         try
         {
-            if (!IsAllowedUrl(cfg.UpdateUrl))
-                return UpdateResult.Fail("更新地址必须是 https://（本地测试可用 http://localhost 或 http://127.0.0.1）");
-
-            var json = await Http.GetStringAsync(cfg.UpdateUrl);
-            var manifest = JsonSerializer.Deserialize<UpdateManifest>(json, Json);
-            if (manifest == null) return UpdateResult.Fail("更新清单格式错误");
-
-            var changed = new List<string>();
-
             if (manifest.Lang != null && !string.IsNullOrWhiteSpace(manifest.Lang.Url))
             {
                 if (await ApplyLangAsync(manifest.Lang, cfg))
@@ -90,8 +113,7 @@ internal static class UpdateService
             cfg.LastUpdateCheck = DateTime.UtcNow.ToString("O");
             ConfigStore.Save(cfg);
 
-            if (changed.Count == 0)
-                return new UpdateResult { Ok = true, Message = "已是最新版本" };
+            if (changed.Count == 0) return new UpdateResult { Ok = true, Message = "已是最新版本" };
 
             return new UpdateResult
             {
@@ -104,13 +126,13 @@ internal static class UpdateService
         catch (Exception ex)
         {
             Log.Write("检查更新失败: " + ex.Message);
-            return UpdateResult.Fail("检查更新失败：" + ex.Message);
+            return UpdateResult.Fail(FriendlyError(ex));
         }
     }
 
     private static async Task<bool> ApplyLangAsync(LangUpdateInfo info, Config cfg)
     {
-        var bytes = await Http.GetByteArrayAsync(info.Url);
+        var bytes = await DownloadWithRetryAsync(info.Url);
         VerifySha256(bytes, info.Sha256);
 
         var path = Path.Combine(ConfigStore.LangDir, "zh-CN.json");
@@ -140,7 +162,7 @@ internal static class UpdateService
 
     private static async Task<bool> PrepareAppUpdateAsync(AppUpdateInfo info)
     {
-        var bytes = await Http.GetByteArrayAsync(info.Url);
+        var bytes = await DownloadWithRetryAsync(info.Url);
         VerifySha256(bytes, info.Sha256);
 
         Directory.CreateDirectory(UpdateDir);
@@ -159,6 +181,52 @@ internal static class UpdateService
         };
         Process.Start(psi);
         return true;
+    }
+
+    private static async Task<byte[]> DownloadWithRetryAsync(string url)
+    {
+        Exception last = null;
+        for (int attempt = 1; attempt <= 3; attempt++)
+        {
+            try
+            {
+                return await FileHttp.GetByteArrayAsync(url);
+            }
+            catch (Exception ex)
+            {
+                last = ex;
+                Log.Write($"下载失败（第 {attempt} 次）：{url} -> {ex.Message}");
+                if (attempt < 3) await Task.Delay(1500);
+            }
+        }
+        throw last ?? new IOException("下载失败");
+    }
+
+    /// <summary>
+    /// 更新源列表：config 里可以用分号/逗号配多个；GitHub raw 地址自动补一个 jsDelivr 镜像，
+    /// 国内 raw 被墙时还能从 CDN 拉。
+    /// </summary>
+    private static List<string> BuildSources(string raw)
+    {
+        var list = new List<string>();
+        foreach (var part in raw.Split(new[] { ';', ',', '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+            if (!string.IsNullOrWhiteSpace(part)) list.Add(part);
+
+        var mirrors = new List<string>();
+        const string rawHost = "raw.githubusercontent.com/";
+        foreach (var url in list)
+        {
+            var idx = url.IndexOf(rawHost, StringComparison.OrdinalIgnoreCase);
+            if (idx < 0) continue;
+            var rest = url.Substring(idx + rawHost.Length);
+            var parts = rest.Split('/', 4);
+            if (parts.Length == 4)
+                mirrors.Add($"https://cdn.jsdelivr.net/gh/{parts[0]}/{parts[1]}@{parts[2]}/{parts[3]}");
+        }
+
+        foreach (var m in mirrors)
+            if (!list.Contains(m, StringComparer.OrdinalIgnoreCase)) list.Add(m);
+        return list;
     }
 
     /// <summary>
@@ -189,7 +257,20 @@ internal static class UpdateService
         if (string.IsNullOrWhiteSpace(expected)) return;
         var actual = Convert.ToHexString(SHA256.HashData(bytes));
         if (!actual.Equals(expected, StringComparison.OrdinalIgnoreCase))
-            throw new InvalidDataException("SHA256 校验失败，已拒绝更新");
+            throw new InvalidDataException("下载内容 SHA256 与清单不一致，已拒绝更新");
+    }
+
+    private static string FriendlyError(Exception ex)
+    {
+        if (ex == null) return "";
+        var text = ex.Message ?? "";
+        if (ex is TaskCanceledException || ex is TimeoutException ||
+            text.Contains("Timeout", StringComparison.OrdinalIgnoreCase) ||
+            text.Contains("canceled", StringComparison.OrdinalIgnoreCase))
+            return "网络超时（GitHub 在国内经常连不上），可以开代理后重试，或改用备用更新源。";
+        if (ex is HttpRequestException)
+            return "网络连接失败：" + text;
+        return text;
     }
 
     private static bool IsNewer(string remote, string local)

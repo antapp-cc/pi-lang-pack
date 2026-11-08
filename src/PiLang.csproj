@@ -7,9 +7,9 @@
     <Nullable>disable</Nullable>
     <AssemblyName>PiLang</AssemblyName>
     <RootNamespace>PiLang</RootNamespace>
-    <Version>1.0.3</Version>
-    <AssemblyVersion>1.0.3.0</AssemblyVersion>
-    <FileVersion>1.0.3.0</FileVersion>
+    <Version>1.0.4</Version>
+    <AssemblyVersion>1.0.4.0</AssemblyVersion>
+    <FileVersion>1.0.4.0</FileVersion>
     <AssemblyTitle>Pi 多语言包</AssemblyTitle>
     <Company>蚁巢</Company>
     <Product>蚁巢</Product>
@@ -23,6 +23,7 @@
     <EmbeddedResource Include="Resources\zh-CN.json" />
   </ItemGroup>
 </Project>
+
 
 
 
