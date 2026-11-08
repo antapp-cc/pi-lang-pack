@@ -72,23 +72,21 @@ internal static class UpdateService
         var sources = BuildSources(cfg.UpdateUrl).Where(IsAllowedUrl).ToList();
         if (sources.Count == 0) return UpdateResult.Fail("没有配置有效的更新地址（必须是 https）");
 
-        // 多个源并行请求，谁先拿到清单用谁，避免串行等超时（最坏要等两轮 45 秒）
-        var pending = sources.Select(s => FetchManifestAsync(s)).ToList();
+        // 按优先级依次尝试（配置顺序），每个源最多等 10 秒：
+        // 主源 404 会立即失败，不会拖慢；不能并行"谁先到用谁"，否则可能用到旧缓存的备源。
         UpdateManifest manifest = null;
         Exception lastError = null;
-        while (pending.Count > 0 && manifest == null)
+        foreach (var source in sources)
         {
-            var completed = await Task.WhenAny(pending);
-            pending.Remove(completed);
             try
             {
-                var m = await completed;
-                if (m != null) manifest = m;
+                manifest = await FetchManifestAsync(source);
+                if (manifest != null) break;
             }
             catch (Exception ex)
             {
                 lastError = ex;
-                Log.Write("更新源失败：" + ex.Message);
+                Log.Write("更新源失败，尝试下一个：" + source + " -> " + ex.Message);
             }
         }
 
@@ -142,7 +140,8 @@ internal static class UpdateService
 
     private static async Task<UpdateManifest> FetchManifestAsync(string source)
     {
-        var json = await Http.GetStringAsync(AppendQuery(source, "t=" + DateTimeOffset.UtcNow.ToUnixTimeSeconds()));
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+        var json = await Http.GetStringAsync(AppendQuery(source, "t=" + DateTimeOffset.UtcNow.ToUnixTimeSeconds()), cts.Token);
         return JsonSerializer.Deserialize<UpdateManifest>(json, Json);
     }
     private static async Task<bool> ApplyLangAsync(LangUpdateInfo info, Config cfg, IProgress<UpdateProgress> progress)
@@ -355,6 +354,7 @@ internal static class UpdateService
         return DateTime.UtcNow - last > TimeSpan.FromHours(6);
     }
 }
+
 
 
 

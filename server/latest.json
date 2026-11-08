@@ -1,12 +1,12 @@
 {
-  "app": {
-    "sha256": "08a07b19d14383ae2fe219967b02fc9c79f40069860bb9171107407aade06788",
-    "url": "https://github.com/antapp-cc/pi-lang-pack/releases/download/v1.0.8/PiLang.exe",
-    "version": "1.0.8"
-  },
   "lang": {
-    "sha256": "51f5ea79d03a0c137238e35a376bcd43c53d6ec5da2d13619e8685e91954380f",
     "url": "https://raw.githubusercontent.com/antapp-cc/pi-lang-pack/main/server/zh-CN.json",
+    "sha256": "51f5ea79d03a0c137238e35a376bcd43c53d6ec5da2d13619e8685e91954380f",
     "version": "0.6.4"
+  },
+  "app": {
+    "url": "https://github.com/antapp-cc/pi-lang-pack/releases/download/v1.0.9/PiLang.exe",
+    "sha256": "72c46486c3ab4635e0f6e9e7feff47d7f35ab337d779ca90fe3c82a73eb46edc",
+    "version": "1.0.9"
   }
 }
