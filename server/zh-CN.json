@@ -628,7 +628,19 @@
     "Your router needs a manual step": "你的路由器需要手动操作",
     "Local block number:": "本地区块号：",
     "Latest block number:": "最新区块号：",
-    "block number:": "区块号："
+    "block number:": "区块号：",
+    "Synced!": "已同步",
+    "Synced": "已同步",
+    "Not synced": "未同步",
+    "Syncing": "同步中",
+    "Not connected": "未连接",
+    "running": "运行中",
+    "stopped": "已停止",
+    "created": "已创建",
+    "restarting": "重启中",
+    "paused": "已暂停",
+    "dead": "已失效",
+    "removing": "移除中"
   },
   "danger": [
     "Remove all blockchain data",
@@ -708,6 +720,94 @@
     {
       "pattern": "^Your computer is syncing with the blockchain \\(it may take hours\\) Catching up to ledger (\\d+): (.*)$",
       "replacement": "你的计算机正在与区块链同步（可能需要几个小时）正在追赶账本 $1：$2"
+    },
+    {
+      "pattern": "^a few seconds ago$",
+      "replacement": "几秒前"
+    },
+    {
+      "pattern": "^a minute ago$",
+      "replacement": "1 分钟前"
+    },
+    {
+      "pattern": "^a few minutes ago$",
+      "replacement": "几分钟前"
+    },
+    {
+      "pattern": "^(\\d+) minutes ago$",
+      "replacement": "$1 分钟前"
+    },
+    {
+      "pattern": "^an hour ago$",
+      "replacement": "1 小时前"
+    },
+    {
+      "pattern": "^(\\d+) hours ago$",
+      "replacement": "$1 小时前"
+    },
+    {
+      "pattern": "^a day ago$",
+      "replacement": "1 天前"
+    },
+    {
+      "pattern": "^(\\d+) days ago$",
+      "replacement": "$1 天前"
+    },
+    {
+      "pattern": "^a month ago$",
+      "replacement": "1 个月前"
+    },
+    {
+      "pattern": "^(\\d+) months ago$",
+      "replacement": "$1 个月前"
+    },
+    {
+      "pattern": "^a year ago$",
+      "replacement": "1 年前"
+    },
+    {
+      "pattern": "^(\\d+) years ago$",
+      "replacement": "$1 年前"
+    },
+    {
+      "pattern": "^just now$",
+      "replacement": "刚刚"
+    },
+    {
+      "pattern": "^in a few seconds$",
+      "replacement": "几秒后"
+    },
+    {
+      "pattern": "^in a minute$",
+      "replacement": "1 分钟后"
+    },
+    {
+      "pattern": "^in (\\d+) minutes$",
+      "replacement": "$1 分钟后"
+    },
+    {
+      "pattern": "^in an hour$",
+      "replacement": "1 小时后"
+    },
+    {
+      "pattern": "^in (\\d+) hours$",
+      "replacement": "$1 小时后"
+    },
+    {
+      "pattern": "^in a day$",
+      "replacement": "1 天后"
+    },
+    {
+      "pattern": "^in (\\d+) days$",
+      "replacement": "$1 天后"
+    },
+    {
+      "pattern": "^([\\d.]+%) from (\\d{4}-\\d{2}-\\d{2}) to (\\d{4}-\\d{2}-\\d{2})$",
+      "replacement": "$1（从 $2 到 $3）"
+    },
+    {
+      "pattern": "^from (\\d{4}-\\d{2}-\\d{2}) to (\\d{4}-\\d{2}-\\d{2})$",
+      "replacement": "从 $1 到 $2"
     }
   ]
 }
