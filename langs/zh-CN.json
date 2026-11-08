@@ -640,7 +640,9 @@
     "restarting": "重启中",
     "paused": "已暂停",
     "dead": "已失效",
-    "removing": "移除中"
+    "removing": "移除中",
+    "To test your ports from the internet we need them free, so your node stops for a minute or two and then starts again on its own. Remote access is unaffected — it does not use these ports.": "为了从互联网测试你的端口，需要这些端口空闲，所以你的节点会停止一两分钟，然后自动重新启动。远程访问不受影响——它不使用这些端口。",
+    "Your node still works, but other nodes may not be able to reach it. SoloHost Remote Access is unaffected.": "你的节点仍在运行，但其他节点可能无法访问它。SoloHost 远程访问不受影响。"
   },
   "danger": [
     "Remove all blockchain data",

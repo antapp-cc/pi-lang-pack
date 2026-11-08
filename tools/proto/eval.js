@@ -1,5 +1,5 @@
 // 通用：连 CDP 执行一段表达式并打印结果
-const PORT = 9341;
+const PORT = 9342;
 const expr = process.argv[2];
 (async () => {
   const targets = await (await fetch(`http://127.0.0.1:${PORT}/json`)).json();
@@ -15,6 +15,7 @@ const expr = process.argv[2];
   console.log(JSON.stringify(result));
   process.exit(0);
 })().catch(e => { console.error('FAIL:', e.message); process.exit(1); });
+
 
 
 
