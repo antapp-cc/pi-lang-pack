@@ -189,6 +189,7 @@ internal sealed class PiLangApp : ApplicationContext
 
     private void DoInstall()
     {
+        _cfg = ConfigStore.Load();
         var pack = LangPack.Load(_cfg.Locale);
         var r = PatchEngine.Install(_cfg, pack);
         _state = r.Ok ? PatchEngine.StatePatched : _state;
@@ -200,6 +201,7 @@ internal sealed class PiLangApp : ApplicationContext
 
     private void DoRestore()
     {
+        _cfg = ConfigStore.Load();
         var r = PatchEngine.Restore(_cfg);
         if (r.Ok) _state = PatchEngine.StateClean;
         RefreshMenu();
@@ -209,6 +211,7 @@ internal sealed class PiLangApp : ApplicationContext
 
     private void SwitchLang(string locale)
     {
+        _cfg = ConfigStore.Load();
         if (_cfg.Locale == locale) return;
         _cfg.Locale = locale;
         ConfigStore.Save(_cfg);
@@ -225,6 +228,7 @@ internal sealed class PiLangApp : ApplicationContext
 
     private void ToggleAutoStart()
     {
+        _cfg = ConfigStore.Load();
         var enable = !IsAutoStart();
         SetAutoStart(enable);
         _cfg.AutoStart = enable;
@@ -337,3 +341,4 @@ internal sealed class PiLangApp : ApplicationContext
         ExitThread();
     }
 }
+
