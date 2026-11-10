@@ -1,0 +1,174 @@
+/* pi-lang-patch */
+/* Pi 多语言包注入脚本。只做显示层文本替换，不改任何业务逻辑。 */
+(function () {
+  'use strict';
+
+  var DATA = __PI_LANG_DATA__;
+  var LOCALE = DATA.locale || 'zh-CN';
+  var ENTRIES = DATA.entries || {};
+  var DANGER = {};
+  (DATA.danger || []).forEach(function (k) { DANGER[k] = 1; });
+
+  var PATTERNS = (DATA.patterns || []).map(function (p) {
+    try { return { re: new RegExp(p.p), r: p.r }; } catch (e) { return null; }
+  }).filter(Boolean);
+
+  // 整句精确匹配用全部键（含 Yes/No/N/A 这类短词）；子串替换只用长键，避免误伤
+  var SUBSTR_KEYS = Object.keys(ENTRIES)
+    .filter(function (k) { return k.length >= 4 && !DANGER[k]; })
+    .sort(function (a, b) { return b.length - a.length; });
+
+  var stats = { hit: 0, miss: 0, samples: [] };
+  var lastValue = new WeakMap();
+  var queue = [];
+  var scheduled = false;
+
+  function norm(s) { return s.replace(/\s+/g, ' ').trim(); }
+  function hasLatin(s) { return /[A-Za-z]/.test(s); }
+
+  function addSample(text) {
+    if (stats.samples.length < 120 && text.length > 1) stats.samples.push(text);
+  }
+
+  // 整句精确 → 危险键只认整句 → 安全键子串（词边界）→ 动态模板
+  function translateString(raw) {
+    var s = norm(raw);
+    if (!s || !hasLatin(s)) return null;
+
+    if (Object.prototype.hasOwnProperty.call(ENTRIES, s)) return ENTRIES[s];
+
+    // 长段落只做整句匹配：一旦对长句做片段替换，就会翻一半剩一半（且采集到的
+    // 未命中文本会是中英混合，没法再补词条）。短文本才允许片段替换。
+    if (s.length > 90) {
+      for (var p = 0; p < PATTERNS.length; p++) {
+        if (PATTERNS[p].re.test(s)) return s.replace(PATTERNS[p].re, PATTERNS[p].r);
+      }
+      return null;
+    }
+
+    var out = s;
+    var changed = false;
+    for (var i = 0; i < SUBSTR_KEYS.length; i++) {
+      var k = SUBSTR_KEYS[i];
+      var idx = out.indexOf(k);
+      if (idx < 0) continue;
+      var before = idx === 0 ? '' : out.charAt(idx - 1);
+      var after = idx + k.length >= out.length ? '' : out.charAt(idx + k.length);
+      if (/[A-Za-z0-9]/.test(before) || /[A-Za-z0-9]/.test(after)) continue;
+      // 译文里若含别的词典键，替换后不再重复处理它
+      out = out.slice(0, idx) + ENTRIES[k] + out.slice(idx + k.length);
+      changed = true;
+    }
+    if (changed) return out;
+
+    for (var p = 0; p < PATTERNS.length; p++) {
+      if (PATTERNS[p].re.test(s)) return s.replace(PATTERNS[p].re, PATTERNS[p].r);
+    }
+    return null;
+  }
+
+  function flush() {
+    scheduled = false;
+    var batch = queue;
+    queue = [];
+    for (var i = 0; i < batch.length; i++) walk(batch[i]);
+  }
+
+  function enqueue(node) {
+    queue.push(node);
+    if (!scheduled) {
+      scheduled = true;
+      (window.requestAnimationFrame || function (f) { setTimeout(f, 16); })(flush);
+    }
+  }
+
+  var ATTRS = ['placeholder', 'title', 'aria-label', 'alt', 'aria-valuetext'];
+
+  function textNode(n) {
+    var parent = n.parentNode;
+    if (parent && (parent.nodeName === 'STYLE' || parent.nodeName === 'SCRIPT' || parent.nodeName === 'NOSCRIPT')) return;
+    var v = n.nodeValue;
+    if (!v || lastValue.get(n) === v) return;
+    var t = translateString(v);
+    if (t == null) {
+      if (/[A-Za-z]{4,}/.test(v)) addSample(norm(v));
+      return;
+    }
+    var lead = (v.match(/^\s*/) || [''])[0];
+    var tail = (v.match(/\s*$/) || [''])[0];
+    // 原文常用 &nbsp; 占位（如"Local block number:&nbsp;&nbsp;"），翻成中文后会把后面的
+    // 数字推得很远、两行对不齐；含 &nbsp; 的尾部空白统一压成一个普通空格
+    if (tail.indexOf('\u00a0') >= 0) tail = ' ';
+    var next = lead + t + tail;
+    n.nodeValue = next;
+    lastValue.set(n, next);
+    stats.hit++;
+  }
+
+  function attrNode(el) {
+    if (!el.getAttribute) return;
+    for (var i = 0; i < ATTRS.length; i++) {
+      var a = ATTRS[i];
+      var v = el.getAttribute(a);
+      if (!v) continue;
+      var t = translateString(v);
+      if (t != null && t !== v) {
+        el.setAttribute(a, t);
+        stats.hit++;
+      }
+    }
+  }
+
+  function walk(root) {
+    if (!root) return;
+    if (root.nodeType === 3) { textNode(root); return; }
+    if (root.nodeType === 1) {
+      var name = root.nodeName;
+      if (name === 'STYLE' || name === 'SCRIPT' || name === 'NOSCRIPT') return;
+      attrNode(root);
+      var kids = root.childNodes;
+      for (var i = 0; i < kids.length; i++) walk(kids[i]);
+      return;
+    }
+    if (root.nodeType === 11) {
+      var ks = root.childNodes;
+      for (var j = 0; j < ks.length; j++) walk(ks[j]);
+    }
+  }
+
+  var mo = new MutationObserver(function (muts) {
+    for (var i = 0; i < muts.length; i++) {
+      var m = muts[i];
+      if (m.type === 'childList') {
+        for (var j = 0; j < m.addedNodes.length; j++) enqueue(m.addedNodes[j]);
+      } else if (m.type === 'characterData') {
+        enqueue(m.target);
+      } else if (m.type === 'attributes') {
+        enqueue(m.target);
+      }
+    }
+  });
+
+  function start() {
+    try { document.documentElement.lang = 'zh-CN'; } catch (e) {}
+    walk(document.body);
+    mo.observe(document.documentElement, {
+      childList: true, subtree: true, characterData: true,
+      attributes: true, attributeFilter: ATTRS,
+    });
+
+    var st = document.createElement('style');
+    st.textContent = 'body,button,input,textarea,select,h1,h2,h3,h4,h5,h6,p,span,a,div{' +
+      'font-family:"Microsoft YaHei UI","Microsoft YaHei","PingFang SC",Roboto,Helvetica,Arial,sans-serif;}' +
+      // 中文没有真正的斜体字形，浏览器合成的倾斜很别扭，统一用正体
+      'i,em,blockquote,span,div,p,h1,h2,h3,h4,h5,h6,strong,b{font-style:normal !important;}';
+    (document.head || document.documentElement).appendChild(st);
+
+    document.documentElement.setAttribute('data-pi-lang', LOCALE);
+    window.__piLangStats = stats;
+    window.__piLangVersion = DATA.version || '';
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
+  else start();
+})();
