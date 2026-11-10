@@ -38,6 +38,8 @@ dotnet publish -c Release -o ..\dist\framework -p:PublishSingleFile=false
 
 ## 在线更新
 
+**更新机制、发版步骤、验证方法和已知坑见 [`docs/更新与发布.md`](docs/更新与发布.md)。**
+
 `server/latest.json` 是更新清单；程序启动后和每 6 小时检查一次，也可托盘手动「检查更新」。
 
 - 程序更新：下载 → SHA256 校验 → 退出 → 替换 → 重启（旧版备份为 `.old`）；
