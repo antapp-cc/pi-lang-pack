@@ -460,7 +460,7 @@ services:
                   brand: "Pi 多语言助手",
                   eyebrow: "Pi Node 界面汉化",
                   heroTitle: "让 Pi Node 显示中文",
-                  heroCopy: "给 Pi Node 桌面版装中文界面的独立小工具，1.4MB 免运行时：641 条词表注入 + 原生菜单和确认弹窗汉化，原生菜单和确认弹窗汉化，官方更新后自动重新汉化，随时可一键还原英文。真正修改界面的是 Windows 上的托盘工具。",
+                  heroCopy: "给 Pi Node 桌面版装中文界面的独立小工具，1.4MB 免运行时：641 条词表注入 + 原生菜单和确认弹窗汉化，官方更新后自动重新汉化，随时可一键还原英文。本页面只做展示、下载和版本核对，真正修改界面的是 Windows 上的托盘工具。",
                   download: "下载汉化工具（1.4MB）",
                   github: "GitHub 仓库",
                   statusTitle: "版本核对",
