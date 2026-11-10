@@ -3,12 +3,14 @@
     "url": "https://raw.githubusercontent.com/antapp-cc/pi-lang-pack/main/server/zh-CN.json",
     "sha256": "51f5ea79d03a0c137238e35a376bcd43c53d6ec5da2d13619e8685e91954380f",
     "updatedAt": "2026-11-10T14:13:53.779Z",
-    "version": "0.6.4"
+    "version": "0.6.4",
+    "entries": 641
   },
   "app": {
     "url": "https://github.com/antapp-cc/pi-lang-pack/releases/download/v1.0.11/PiLang-AU3.exe",
     "sha256": "7f75303638384194fc0113f5ce5ceb2876ea07a6dcbf9d5d6199515ed1d8e484",
     "updatedAt": "2026-11-10T14:13:53.779Z",
-    "version": "1.0.11"
+    "version": "1.0.11",
+    "size": 1471488
   }
 }

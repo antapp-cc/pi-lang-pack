@@ -1,0 +1,16 @@
+title: Antapp Pi Lang Assistant
+description: >
+  Install the Pi Lang Assistant: a SoloHost app that shows the Pi Node localization
+  status, the latest tool version (1.4MB, no runtime needed), dictionary size and a
+  download entry. The page itself never modifies the Pi Node client.
+output_file: .env
+after_save: Saved. Continue to preview the app.
+footer_hint: The localization tool is downloaded from GitHub Releases; this app only displays status and version info.
+
+fixed_values:
+  - name: PILANG_PORT
+    value: "8090"
+    env_comment: >
+      Local web port used by the SoloHost container.
+
+fields: []

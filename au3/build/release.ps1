@@ -46,19 +46,23 @@ $exeSha = (Get-FileHash (Join-Path $OutDir $exeName) -Algorithm SHA256).Hash.ToL
 $langSha = (Get-FileHash (Join-Path $OutDir 'zh-CN.json') -Algorithm SHA256).Hash.ToLower()
 $now = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ss.fffZ')
 
-# 字段名与 C# 版清单一致：Updater 按 app/lang 读，version 决定更不更新
+# 字段名与 C# 版清单一致：Updater 按 app/lang 读，version 决定更不更新。
+# size/entries 只给 SoloHost 展示页用（显示体积和词条数），更新客户端会忽略。
+$langJson = Get-Content (Join-Path $OutDir 'zh-CN.json') -Raw -Encoding utf8 | ConvertFrom-Json -AsHashtable
 $manifest = [ordered]@{
     lang = [ordered]@{
         url       = "https://raw.githubusercontent.com/$Repo/main/server/zh-CN.json"
         sha256    = $langSha
         updatedAt = $now
         version   = '0.6.4'
+        entries   = $langJson.entries.Count
     }
     app  = [ordered]@{
         url       = "https://github.com/$Repo/releases/download/$Tag/$exeName"
         sha256    = $exeSha
         updatedAt = $now
         version   = $Version
+        size      = (Get-Item (Join-Path $OutDir $exeName)).Length
     }
 }
 $manifestPath = Join-Path $OutDir 'latest.json'

@@ -1,0 +1,653 @@
+services:
+  antapp-pilang-assistant:
+    image: nginx:1.27-alpine
+    container_name: antapp-pilang-assistant
+    restart: unless-stopped
+    labels:
+      pi.ui.primary: "true"
+    ports:
+      - "127.0.0.1:${PILANG_PORT:-8090}:80"
+    environment:
+      - TZ=Asia/Shanghai
+    command:
+      - /bin/sh
+      - -c
+      - |
+        set -eu
+        cat > /usr/share/nginx/html/index.html <<'EOF'
+        <!doctype html>
+        <html lang="zh-CN">
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1">
+          <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://raw.githubusercontent.com https://cdn.jsdelivr.net; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'">
+          <meta name="referrer" content="no-referrer">
+          <title>Pi 多语言助手</title>
+          <style>
+            :root {
+              color-scheme: light;
+              --bg: #f7f6fb;
+              --surface: #ffffff;
+              --surface-soft: #f4f2fa;
+              --ink: #14121b;
+              --muted: #6b6676;
+              --line: #e6e2ef;
+              --purple: #7c3aed;
+              --purple-dark: #5b21b6;
+              --green: #15803d;
+              --green-bg: #ecfdf3;
+              --warn-bg: #fffbeb;
+              --warn-line: #fde68a;
+              --danger: #b42318;
+              --shadow: 0 16px 40px rgba(31, 20, 60, 0.10);
+            }
+
+            * { box-sizing: border-box; }
+
+            body {
+              margin: 0;
+              min-height: 100vh;
+              background:
+                radial-gradient(1200px 600px at 85% -10%, rgba(124, 58, 237, 0.10), transparent 60%),
+                radial-gradient(900px 500px at -10% 110%, rgba(56, 189, 248, 0.08), transparent 55%),
+                var(--bg);
+              color: var(--ink);
+              font-family: "Inter", "Segoe UI", "Microsoft YaHei UI", "PingFang SC", Arial, sans-serif;
+              -webkit-font-smoothing: antialiased;
+            }
+
+            a { color: inherit; }
+
+            .app-shell {
+              width: min(1040px, 100%);
+              margin: 0 auto;
+              padding: 26px 30px 48px;
+            }
+
+            .topbar {
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              gap: 12px;
+              margin-bottom: 26px;
+            }
+
+            .brand {
+              display: flex;
+              align-items: center;
+              gap: 10px;
+              font-weight: 700;
+              letter-spacing: 0.2px;
+            }
+
+            .brand-mark {
+              width: 34px;
+              height: 34px;
+              border-radius: 10px;
+              display: block;
+              object-fit: cover;
+              box-shadow: 0 8px 18px rgba(109, 40, 217, 0.22);
+            }
+
+            .lang-switch {
+              display: inline-flex;
+              padding: 3px;
+              gap: 2px;
+              border: 1px solid var(--line);
+              border-radius: 999px;
+              background: rgba(255, 255, 255, 0.8);
+              backdrop-filter: blur(6px);
+            }
+
+            .lang-switch button {
+              border: 0;
+              background: transparent;
+              color: var(--muted);
+              font-size: 12px;
+              font-weight: 600;
+              padding: 6px 12px;
+              border-radius: 999px;
+              cursor: pointer;
+              font-family: inherit;
+            }
+
+            .lang-switch button.active {
+              background: var(--purple);
+              color: #fff;
+              box-shadow: 0 4px 10px rgba(124, 58, 237, 0.3);
+            }
+
+            .hero {
+              background: var(--surface);
+              border: 1px solid var(--line);
+              border-radius: 20px;
+              box-shadow: var(--shadow);
+              padding: 30px 30px 26px;
+              margin-bottom: 18px;
+            }
+
+            .eyebrow {
+              margin: 0 0 10px;
+              font-size: 12px;
+              font-weight: 700;
+              letter-spacing: 0.14em;
+              text-transform: uppercase;
+              color: var(--purple);
+            }
+
+            h1 {
+              margin: 0 0 12px;
+              font-size: clamp(26px, 4vw, 38px);
+              line-height: 1.15;
+              letter-spacing: -0.02em;
+            }
+
+            .hero-copy {
+              margin: 0;
+              max-width: 62ch;
+              color: var(--muted);
+              line-height: 1.75;
+              font-size: 15px;
+            }
+
+            .hero-actions {
+              display: flex;
+              flex-wrap: wrap;
+              gap: 10px;
+              margin-top: 22px;
+            }
+
+            .primary-button,
+            .secondary-button {
+              display: inline-flex;
+              align-items: center;
+              justify-content: center;
+              gap: 8px;
+              padding: 12px 22px;
+              border-radius: 12px;
+              font-size: 14px;
+              font-weight: 700;
+              text-decoration: none;
+              cursor: pointer;
+              border: 1px solid transparent;
+              font-family: inherit;
+            }
+
+            .primary-button {
+              background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+              color: #fff;
+              box-shadow: 0 10px 22px rgba(109, 40, 217, 0.3);
+            }
+
+            .primary-button:hover { filter: brightness(1.05); }
+
+            .secondary-button {
+              background: var(--surface);
+              color: var(--ink);
+              border-color: var(--line);
+            }
+
+            .secondary-button:hover { border-color: #cbc3e0; }
+
+            .status-panel {
+              background: var(--surface);
+              border: 1px solid var(--line);
+              border-radius: 20px;
+              box-shadow: var(--shadow);
+              padding: 24px 26px;
+              margin-bottom: 18px;
+            }
+
+            .panel-head {
+              display: flex;
+              align-items: flex-start;
+              justify-content: space-between;
+              gap: 16px;
+              margin-bottom: 16px;
+            }
+
+            .panel-head h2 {
+              margin: 0 0 6px;
+              font-size: 19px;
+            }
+
+            .panel-head p {
+              margin: 0;
+              color: var(--muted);
+              font-size: 13.5px;
+              line-height: 1.6;
+            }
+
+            .status-grid {
+              display: grid;
+              grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+              gap: 12px;
+            }
+
+            .status-card {
+              border: 1px solid var(--line);
+              border-radius: 14px;
+              background: var(--surface-soft);
+              padding: 14px 16px;
+              display: flex;
+              gap: 10px;
+              align-items: flex-start;
+            }
+
+            .state-dot {
+              width: 10px;
+              height: 10px;
+              border-radius: 50%;
+              flex: none;
+              margin-top: 5px;
+              background: #cbc3e0;
+            }
+
+            .state-dot.ok { background: #16a34a; box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.15); }
+            .state-dot.checking { background: #f59e0b; animation: pulse 1.2s infinite; }
+            .state-dot.muted { background: #c4bfd0; }
+
+            @keyframes pulse { 0%,100% { opacity: 0.35; } 50% { opacity: 1; } }
+
+            .status-card h3 {
+              margin: 0 0 5px;
+              font-size: 12px;
+              font-weight: 700;
+              letter-spacing: 0.08em;
+              text-transform: uppercase;
+              color: var(--muted);
+            }
+
+            .status-card p {
+              margin: 0;
+              font-size: 14px;
+              line-height: 1.55;
+              word-break: break-word;
+            }
+
+            .steps {
+              display: grid;
+              grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+              gap: 14px;
+              margin-bottom: 18px;
+            }
+
+            .step-card {
+              background: var(--surface);
+              border: 1px solid var(--line);
+              border-radius: 18px;
+              padding: 20px;
+              box-shadow: 0 6px 20px rgba(31, 20, 60, 0.05);
+            }
+
+            .step-num {
+              width: 32px;
+              height: 32px;
+              border-radius: 10px;
+              display: grid;
+              place-items: center;
+              font-weight: 800;
+              color: var(--purple-dark);
+              background: rgba(124, 58, 237, 0.10);
+              margin-bottom: 12px;
+            }
+
+            .step-card h3 { margin: 0 0 8px; font-size: 16px; }
+
+            .step-card p { margin: 0; color: var(--muted); font-size: 13.5px; line-height: 1.7; }
+
+            .notice {
+              background: var(--warn-bg);
+              border: 1px solid var(--warn-line);
+              border-radius: 16px;
+              padding: 18px 20px;
+              margin-bottom: 18px;
+              font-size: 13.5px;
+              line-height: 1.75;
+              color: #78350f;
+            }
+
+            .notice strong { color: #92400e; }
+
+            .notice ul { margin: 8px 0 0; padding-left: 20px; }
+            .notice li { margin: 4px 0; }
+
+            .footer {
+              color: var(--muted);
+              font-size: 12.5px;
+              line-height: 1.7;
+              text-align: center;
+              padding-top: 6px;
+            }
+
+            .footer a { color: var(--purple-dark); text-decoration: none; font-weight: 600; }
+
+            .toast {
+              position: fixed;
+              left: 50%;
+              bottom: 26px;
+              transform: translate(-50%, 20px);
+              background: #1c1830;
+              color: #fff;
+              padding: 11px 18px;
+              border-radius: 12px;
+              font-size: 13px;
+              opacity: 0;
+              pointer-events: none;
+              transition: all 0.25s ease;
+              max-width: min(560px, calc(100% - 40px));
+              box-shadow: 0 12px 30px rgba(20, 12, 40, 0.35);
+            }
+
+            .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+            code {
+              font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+              font-size: 0.92em;
+              background: rgba(124, 58, 237, 0.08);
+              border-radius: 6px;
+              padding: 1px 5px;
+            }
+          </style>
+        </head>
+        <body>
+          <main class="app-shell">
+            <header class="topbar">
+              <div class="brand">
+                <img class="brand-mark" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAABCXSURBVHhe7V0NlF1VdZ4QQLH4S0Myd5/3BmJUGq2thFqL1fEneXef92ZALbN0YS3WH3TRtaS1av1pHRUWoPgXDT+Td/a5b2aSQEZXqlCpxZpI8YdWSikooFjUgFQK1KQkwQSS1/Wdc++b9+68mXlvZpK5z7xvrb0yufe+c+89+5y999ln7317errooosuuuiiiy66yAhUqULE5Rev0OaMFcXR33n+wMhvp6/p4jCAeOPLiOVTxPZ6xfaWgO3tFNqbSUcTAZsLgteNnpT+TRcLgNVDE8cHoXk3sfwgVxqv5gY2VXOlsUka2FwlbZ8gLZXegc3d2bCgGK4eo1g+SjralxsYryodVZW2UwhMIS2/pmL0lnQTXcwDQTF6q9J2Dzo43ekNVKxUFcsTSttLe4aHj0m308UcEOiNz1davgcRM6XD01SsVIntAdJyUU9Pz5Ll68Z+KyhGv59jO0haNBXlD6G8V/H6p6Tv00UT5Eubn00sm3PF0WnFTj1BFygtjwVaBvLheK/SUiFtHyQtu0nbXUrbh4nlVqXNpWBs+n5d1KGvP3oqhXK5QudDtDTp8EaKvA5g+XZfMVpBoXwMv4XOyJVGY/IKG8eJ5bsBm5ek79tFT0/PmvNHjlNshpW2TzgGTOnsNEVVWEbEZhdGf1C0Z1Iou/2MSF/rRVVuYAv+Hu8dGHla+v5HPYKSPY+02TO1A6OqKqYJo9yN/IdUKH+BDiU25RxmDc6nOz+m+Dd353X55en7H9Xo1eWXKzY/ntL5cWerEkTSJBHLLtL2q0FozsLvAy5D4e6GyEl3egMDSqPVgOWBXPy7LuBeKJSfQyz/CHHSMHpjMUQsN5K2HyeWD5I2Hw60eXfA5rVQ1vg9afsaYrnTXz/96HcMwMKN7fdz4cYXpp/jqAU6V3F00Fs9DZ3/pGKz/pTipr6enuoSd7G3893fXulG7yG297TS+V4HQASZDT093fWCgypWXqlYfu5Gf11H+cWVWb+6f+LE5Foq2edRKO+hUK6g0G4jljuIZZ9jHHSCs3Zg/YxV/bFYH6DjcWxwC9q8RWn7u41PcZRizZqR42CR+M5PRq+X+cTy91g8JdcqltfDH0Q62l8bzTWfECwhu49YHiCWnxPLfxPbXVicoT1iOUTa/oq0+ZZi6W98iqMYFNo3wIqpV7yQ0UEo/0kF+b3adSx/qrR9yLkk3MgGs2JLyHW+/IDY/k2OTUEVzSuDggyQjt6p2A4H2nwuCOUypcvnnjxYXt74BEcx3IJL201OLCSdXxqDZ3N3EJq3JtehQ0nLztxgyiVRcrNkP4VyTbZESqyrsg5nuWj5aW30u1FdOUjaXNkzNLHUXbPWPg8r3LQzLh71jxGXL+of3nEsrs1pcwYVzVtUaP9WsXyetHyBWD6jQntpUJRL8K8jbS+mEBaV/QRWzQHLR3KzEGaSu57NJ/xv5SKFWRVGl6FN0nI57uXuF99bhfKB/ODGU9PvnRk4y8d1vpf98QLpnkCPel9N//CxAcvnvciZdEngukDb+1Vo36HO2XpCL5sCadkEhaxY9tb2DGq0OfX/FDmlPQulfzMbDW5xRkAQ2s+u4vFnpN990ZHjynOhEBPLBw9LbPfDxk+uoWJUatQPic/H3ktcLgavHT3JjUpt/yfpSM+oWD8sKmGguFn6L5l0/hGbIdLyeDKyneyHtzK2elawLFPafAkd29D52t4Df8/ydWMnE1urtD2UMDFr5FfksqM2ozODoYmlkKVuhyu20YnlSRVG708UGBWddbRvkkHjVcX2Z1DIq4eGj6fQXFlzSzR5+SyQYwDLN9Xg2Kp0FywqVr7+ypOJ5VpV9PI/Hv2/RKQDzmMzhdhu8CKltiZ4NKftG3GetL1QaXtwNp/PYlNmGYBQEmL510l7vlKlUDYlyspHP5gHasoX17Adxrne0L6CWB6c4rDLIGWWAbFd/2itg1kOKjZvcieHh49xIxyrXLfSHYfncjt0wklnmacrlu2+872iyzJllwEcvck9pOvkUUQz/DQRP3CuKZZ/cCtcL3r+l9gWcS7Q0V9DVzQ47DJMWWXAkiC0702Ub6yAv5JbawKchIuYtNnp/DuwgFiu6hmaOB5mq2L5UVYtnmaUSQYgKoG0uTjFgC+edKZ5Os6r0IYwT2OTc1egRwdwPND2s1gl1y/Isk0wLtwMvjFfkpXpflg0LBuaOFFpuz6R8Y4Bof249/FXl+S0fS90Qm7wGucN7Ts7epZbE7C5vaXwFFAdcxNRthDULvO9X8t8fXmW3BEr1048U4V2ZLKD3Az4K5zze7r2KlhFzifE0V/iuGJ5O2nZ5TqhyYs6ihW2X1tUfKgiy+NKyx6lzR7F8phi+39TCcenO9dIxHJgyn1nIM8A+aflg2PZYQBMTVWwV9UzQGn7DpxTha3PQeCt3zKUuxTbP8BxrBmaj36/hoivP6C07Axg3mozrrRcBvc0Nm8U2wuoaN9F2rwTLup6yhXtu1zcaep4PeH5cojQg1+K7d5WZ0ImGYAIZmK7ZbLzIYoi53pehu1FLd/ND14Lu/96uKvhR6HQ3jbpkojJiTAs4OzDTtGxGaYwehWCc7HJ472pC+sW7vPrl4a9i5kokwzIs6wmlvsmF1l1M8DF/cud+bO24tiIO6btuQFWwTXxk/iEZH/A8mXiaOhIhaXnw6tPB8M7lwFDE0tVaN4PB5rv/NgPFNoLcZp4oyItP1G6cgjX4VjA8lHPpESxunXD3Yrt++ANTd/icEIVyi8llkc6lgGwh0nLPbUXqDFAPobzubNMQGz/i0KzG95S9xuWq10kW+K2YHsDXBXpto8EegvlNc713ZEMGJpYGrBcUhv9dQyAcuvv33HsSudilruDUO7PsfwxZDj0RX7wGnc9hXKtKpQXbVHTCxHUqQzoHRjNY7fLJ1kkD5m4os1W2PsuIjqU77tZElZeiMwY0nZbvCbY3Lt2NJ9u90gCQQLw2nYkA2JzcO8UW97JdPtDjGy3SmZzPbH8R18YnQKmYCWJHIFWRz7aUOd85oSefr9PvJDAxj/CXTqOAS5ZguWbU0zJhAEsB3oL5XW4FuIoYHuLc8q9pkKk7cWzxfFgAYdkjIDteW7TnO0nEcKoCuVzkZgBP5IzT88fOW4+0XCYlcT2Fx3HAJehwvKLpo60WB/AP+QcdVw+j1huQpIF7Pll/RtqUXHNACcesfm00nI/aXtAsRxSWg7BneGCslgeIS23Bdp+iUL7Ibg10m20ihU8vtoF9XYaAxQ738+haX34fhb8u99kL7+YWKL8utn9J/nBsVNd9FwcIVdbV9SR9+EgjH0zLKjbE6/rXNA7MHIaGN1RDPDbi3JjffBVmrzb1u7Nabtu2dCGE4NQ1mIGpNuqh3rZ1hPAWCfWZnENxG7hJ5FDgKzLdFutIs5Zc67y9D2aUSYYkA/t6cTmjkbrJ0U+HP1QoO1ILYmuf3hGJQq9oGCuttAZriNY7kOQV7qddoDoho5jgOLozW5DfZYNdOgH0vYnfYXotHQbzYBtS98R04i1hBJxFJpLV/EN88qQ7FAG2GHfCTN3FGQ1Eq29C2JmJ9qQC2uxn/RW1Szt+hDGOxYiGcOLIL9bl75PM1p8BmCDna2Nk+JmJTxwoOVr8IKmm0phScD2fZORcFPbcu35XbVfKzZvTjcwF/QORKcpbVsSe8n7LCoD4tDBrza1/5uQDzuUO1uxVGCTq1D+WcVxm/WMcDtYbv8gegyBt97+nz9wz0B30DrAb6Tb7blSqwxweuBeLKrSbTUDccWZrPgN1gBJEG6cnH2z0vLncGekfzdXUAmuCNs5rggs3VFWpukCrAnF1soD2JhPtzUt+nccGxTsmS55j611W5osbw8KNpe+dL7I6dEzOmo/oDe0pyu2t7b+wC6Y9ZGsVjxBUHCg7aOtv88iMyDg0Zcg4rnVB3Y+f5Y9uXiTPmugsPwqBIq1+j6LzgC1zrzIVTtpUQR517QcVEW5JN1WFoAIPRedMcuaJqFFZwACkpwSbtEK8g/twtBH021lAcRyflOX+jSUAQa4kjNfaR5S0py800x2rBwaeWa6vcWE2xxi+aJi23J03qIzAAsmxXZjqwsx/9Bu5XpvrrTxFenGFhPYHGpLnGaEAYhq+IjS0aHZXBE1clFt0QEKyx9Kt7WYiBVwy7thoEwwgFjO8fuorclN9+CDWxCqsi1L9XyoaDcoHR1seSBlhQF9a8uIJru1LUXsMyZ/mQsrmSgng3glZO63o8vce2SBAUioUzq6rh094B7e5wZ8+UhFvc2EnLYfpmKlltHZKmWCAQCi2yDX23oBf+1+mH7p9o4k8qXKGmJzdzszOKHMMMA7seRH7b5EbBHdhRIE6TaPBLCB49zpDZVcWqfMMAD7sAGbUT+q23mRqIpSBghZhxxON3u4QUVBIah9c81Fzg4DIIZCWatYHp5xb7gZxWIrCM3nkvJkRwKBtm8kDddzm89bR5liAExKZD96O7qdWVCLnnsCQVtYEKXbXmiQNn/iQujbsPmbUaYYALgEPLdB3/6LuZdBaWI2G/rOjk5Jt70QwFaoYvs2xbKzvorLXClzDHBKTcsVteSMJg89IzlZHFUDNjeg1tBsm/ftwGfiyBXIF5vLAGlGmWMAoErmRaT9dwDSD9wSgXE+kOtnrjhSofzSpILiXOCTQuyFKAqFtheq80GZZACA+m8BKh224Z5oJF+uGP8S27vgpUQR1lOKpg8LvxlnxtDQUuiRIDR/5AJ4Wbaj7FkrIS7tUmYZ4JO15XI32uZo4nmKGVGMoKRRKf02uL9RpSpw+cbmbWA2afmzgO0FruxYiKrq5makQvmOnzm0ZT6UWQYALh0pNNucsptvBxSTdNW4ahZKVLLdi90rX2tCfkU+z3e/EzMN1bWatLdAlGkGAMiYRIppMorTLzBnisMRXXxQUr6+vvRN+vrDRJlnAABZHITmewsyEzJGHcEAgDjC56lu+k1jQsyAbNWKmA6IhnN1gmAZzUsxZ4d8tRT7DUQIpt83k0AUBb4F5ishzn8lunCUJIm39zxJvSAUHE+/a2aB7wig4iyx9XXhFlskJWlOyG+GP8r/O/W6JpTJgk0tAuHng4grdcU8jvhsiGq5ZW4jyT1H9HcuZRZJgC3OhE5mgEOOr35uXJP5QeiGhXQTTEduPeEdf/vwlQ24KZBkDm9uTou4644WBgAoYYBPlRCbLb5UjK/l3GontERJsadSUibNbscnUpbXZWoiMAvfJvP6oLV7/0YwIIHLgMcHHLTdhiqL7gWRD+D8Sa11SAPVVs8uEg8fd7iPtFyHPOVmgQC9A9c9jTTK5LeujL0VJDcFoXlBur2OBcoQYEYolkuI7U0+WMpnxPhRDBESm7LOconzhOu+tJGEl/gvbdhvuI8DFc2rkVKbvl8CFBUklq/7bJy6WkczUN5/5fVbrZZZ6DhANsezAvX8N7svLYXybwHLj5FKRFoewrYisdlJ2vxQsXwnCOVrFEKWyweQwY8qXel2mwFZ+8i0B8MDlsednwm5DGweIRZ8JvFh9zeOQYyxeRyVVYijD2YpwOywYRWvf0Z+3dipwTq3oOtH5+bxXUktA/isCZIrEC6PzJm5pqvmS1c+WxXKjCq/2Lbs1dHrekN7Nr5jBsLfIJxz16DEfhNx1kUXXXTRRRdddNFFFxnH/wNqETqqyqLcXwAAAABJRU5ErkJggg==" alt="蚁巢" width="34" height="34">
+                <span data-i18n="brand">蚁巢 Pi 多语言助手</span>
+              </div>
+              <div class="lang-switch" role="group" aria-label="Language">
+                <button type="button" data-lang="zh" class="active">中文</button>
+                <button type="button" data-lang="en">EN</button>
+              </div>
+            </header>
+
+            <section class="hero">
+              <p class="eyebrow" data-i18n="eyebrow">Pi Node 界面汉化</p>
+              <h1 data-i18n="heroTitle">让 Pi Node 显示中文</h1>
+              <p class="hero-copy" data-i18n="heroCopy">
+                给 Pi Node 桌面版装中文界面的独立小工具，1.4MB 免运行时：641 条词表注入 +
+                原生菜单和确认弹窗汉化，官方更新后自动重新汉化，随时可一键还原英文。
+                真正修改界面的是 Windows 上的托盘工具。
+              </p>
+              <div class="hero-actions">
+                <a class="primary-button agent-download-link" id="downloadAgent" href="#" data-i18n="download">下载汉化工具（1.4MB）</a>
+                <a class="secondary-button" href="https://github.com/antapp-cc/pi-lang-pack" target="_blank" rel="noreferrer" data-i18n="github">GitHub 仓库</a>
+              </div>
+            </section>
+
+            <section class="status-panel">
+              <div class="panel-head">
+                <div>
+                  <h2 data-i18n="statusTitle">版本核对</h2>
+                  <p data-i18n="statusCopy">从 GitHub 读取当前最新版本，用于确认你手上的是不是最新版。</p>
+                </div>
+              </div>
+              <div class="status-grid">
+                <article class="status-card" id="versionCard">
+                  <span class="state-dot checking"></span>
+                  <div>
+                    <h3 data-i18n="latestVersion">最新程序版本</h3>
+                    <p id="versionText" data-i18n="checking">正在读取…</p>
+                  </div>
+                </article>
+                <article class="status-card" id="langCard">
+                  <span class="state-dot muted"></span>
+                  <div>
+                    <h3 data-i18n="langVersion">词表版本</h3>
+                    <p id="langText" data-i18n="checking">正在读取…</p>
+                  </div>
+                </article>
+                <article class="status-card" id="updateCard">
+                  <span class="state-dot muted"></span>
+                  <div>
+                    <h3 data-i18n="updateTime">更新时间</h3>
+                    <p id="updateText" data-i18n="checking">正在读取…</p>
+                  </div>
+                </article>
+              </div>
+            </section>
+
+            <section class="steps">
+              <article class="step-card">
+                <div class="step-num">1</div>
+                <h3 data-i18n="step1Title">下载并运行</h3>
+                <p data-i18n="step1Copy">下载 Pi多语言包-AU3.exe（1.4MB，免运行时），双击运行，系统托盘会出现蚁巢图标。</p>
+              </article>
+              <article class="step-card">
+                <div class="step-num">2</div>
+                <h3 data-i18n="step2Title">安装中文补丁</h3>
+                <p data-i18n="step2Copy">先把 Pi Node 完全退出（托盘图标也退掉），再右键托盘图标 →「安装中文补丁」。原版界面文件会自动备份。</p>
+              </article>
+              <article class="step-card">
+                <div class="step-num">3</div>
+                <h3 data-i18n="step3Title">重启 Pi Node</h3>
+                <p data-i18n="step3Copy">重启后界面即为中文。以后官方更新覆盖界面文件，托盘会自动重新汉化，无需手动操作。</p>
+              </article>
+            </section>
+
+            <section class="notice">
+              <strong data-i18n="noticeTitle">能翻什么、翻不了什么</strong>
+              <ul>
+                <li data-i18n="noticeItem1">能翻：应用自己渲染的界面（641 条词条）、原生菜单栏（文件/视图/帮助，30 条）、危险操作确认弹窗（8 条）。</li>
+                <li data-i18n="noticeItem2">翻不了：Pi 应用里内嵌的远程网页（webview）、服务器下发的通知正文、日志和报错堆栈。</li>
+                <li data-i18n="noticeItem3">本页面在 SoloHost 容器里运行，不会修改 Pi Node 客户端；汉化由 Windows 托盘工具完成。</li>
+                <li data-i18n="noticeItem4">已验证 Pi Network 0.6.4；官方升级后界面结构变了会拒绝安装并保留原文件，不会把应用弄坏。</li>
+              </ul>
+            </section>
+
+            <footer class="footer">
+              <span data-i18n="footer">由蚁巢制作 · 独立工具，不修改 Pi Node 官方程序签名 · 已适配 Pi Network 0.6.4</span>
+              <br>
+              <a href="https://github.com/antapp-cc/pi-lang-pack/releases" target="_blank" rel="noreferrer" data-i18n="releases">查看所有版本</a>
+            </footer>
+          </main>
+
+          <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+          <script>
+            (function () {
+              "use strict";
+
+              var MANIFEST_URLS = [
+                "https://raw.githubusercontent.com/antapp-cc/pi-lang-pack/main/server/latest.json",
+                "https://cdn.jsdelivr.net/gh/antapp-cc/pi-lang-pack@main/server/latest.json"
+              ];
+
+              var I18N = {
+                zh: {
+                  brand: "Pi 多语言助手",
+                  eyebrow: "Pi Node 界面汉化",
+                  heroTitle: "让 Pi Node 显示中文",
+                  heroCopy: "给 Pi Node 桌面版装中文界面的独立小工具，1.4MB 免运行时：641 条词表注入 + 原生菜单和确认弹窗汉化，原生菜单和确认弹窗汉化，官方更新后自动重新汉化，随时可一键还原英文。真正修改界面的是 Windows 上的托盘工具。",
+                  download: "下载汉化工具（1.4MB）",
+                  github: "GitHub 仓库",
+                  statusTitle: "版本核对",
+                  statusCopy: "从 GitHub 读取当前最新版本，用于确认你手上的是不是最新版。",
+                  latestVersion: "最新程序版本",
+                  langVersion: "词表版本",
+                  updateTime: "更新时间",
+                  checking: "正在读取…",
+                  loading: "正在读取…",
+                  sizeUnknown: "免运行时",
+                  loadFail: "读取失败，请稍后重试",
+                  appVersion: "程序 {v} · {s}",
+                  langVersionText: "{v}（{n} 条词条）",
+                  updateTimeText: "{t}",
+                  step1Title: "下载并运行",
+                  step1Copy: "下载 Pi多语言包-AU3.exe（1.4MB，免运行时），双击运行，系统托盘会出现蚁巢图标。",
+                  step2Title: "安装中文补丁",
+                  step2Copy: "先把 Pi Node 完全退出（托盘图标也退掉），再右键托盘图标 →「安装中文补丁」。原版界面文件会自动备份。",
+                  step3Title: "重启 Pi Node",
+                  step3Copy: "重启后界面即为中文。以后官方更新覆盖界面文件，托盘会自动重新汉化，无需手动操作。",
+                  noticeTitle: "能翻什么、翻不了什么",
+                  noticeItem1: "能翻：应用自己渲染的界面（641 条词条）、原生菜单栏（文件/视图/帮助，30 条）、危险操作确认弹窗（8 条）。",
+                  noticeItem2: "翻不了：Pi 应用里内嵌的远程网页（webview）、服务器下发的通知正文、日志和报错堆栈。",
+                  noticeItem3: "本页面在 SoloHost 容器里运行，不会修改 Pi Node 客户端；汉化由 Windows 托盘工具完成。",
+                  noticeItem4: "已验证 Pi Network 0.6.4；官方升级后界面结构变了会拒绝安装并保留原文件，不会把应用弄坏。",
+                  footer: "由蚁巢制作 · 独立工具，不修改 Pi Node 官方程序签名 · 已适配 Pi Network 0.6.4",
+                  releases: "查看所有版本",
+                  toastLang: "已切换为中文"
+                },
+                en: {
+                  brand: "Pi Lang Assistant",
+                  eyebrow: "Pi Node UI localization",
+                  heroTitle: "Make Pi Node speak Chinese",
+                  heroCopy: "A standalone Windows tray tool that localizes the Pi Node desktop client: 1.4 MB, no runtime required. 641 dictionary entries plus native menus and confirm dialogs, re-applied automatically after official updates, with one-click restore to English. This page only shows info, download and version check — the tray tool does the actual work.",
+                  download: "Download tool (1.4 MB)",
+                  github: "GitHub repo",
+                  statusTitle: "Version check",
+                  statusCopy: "Reads the latest version from GitHub so you can confirm you are on the newest build.",
+                  latestVersion: "Latest app version",
+                  langVersion: "Dictionary version",
+                  updateTime: "Updated at",
+                  checking: "Loading…",
+                  loading: "Loading…",
+                  sizeUnknown: "no runtime",
+                  loadFail: "Failed to load, try again later",
+                  appVersion: "App {v} · {s}",
+                  langVersionText: "{v} ({n} entries)",
+                  updateTimeText: "{t}",
+                  step1Title: "Download and run",
+                  step1Copy: "Download PiLang-AU3.exe (1.4 MB, no runtime needed) and double-click it. An AntNest icon appears in the tray.",
+                  step2Title: "Apply the Chinese patch",
+                  step2Copy: "Quit Pi Node completely first (including its tray icon), then right-click the tray icon → \"Apply Chinese patch\". The original UI files are backed up automatically.",
+                  step3Title: "Restart Pi Node",
+                  step3Copy: "Restart Pi Node and the UI is Chinese. Future official updates that replace the UI files are re-localized automatically.",
+                  noticeTitle: "What is covered",
+                  noticeItem1: "Localized: the app's own UI (641 entries), the native menu bar (File/View/Help, 30 items) and destructive-action confirm dialogs (8 items).",
+                  noticeItem2: "Not localized: remote pages embedded via webview, notification bodies pushed from the server, logs and stack traces.",
+                  noticeItem3: "This page runs inside a SoloHost container and never modifies the Pi Node client; the Windows tray tool does that.",
+                  noticeItem4: "Verified on Pi Network 0.6.4. If an official update changes the UI structure the tool refuses to patch and keeps the original files, so the app never breaks.",
+                  footer: "Built by AntNest · standalone tool, does not modify Pi Node's official signature · verified on Pi Network 0.6.4",
+                  releases: "All releases",
+                  toastLang: "Switched to English"
+                }
+              };
+
+              var lang = "zh";
+              try { lang = localStorage.getItem("pilang.assistant.lang") || "zh"; } catch (e) { }
+              try {
+                var urlLang = new URLSearchParams(location.search).get("lang");
+                if (urlLang && I18N[urlLang]) lang = urlLang;
+              } catch (e) { }
+              if (!I18N[lang]) lang = "zh";
+
+              var elements = {
+                versionText: document.getElementById("versionText"),
+                langText: document.getElementById("langText"),
+                updateText: document.getElementById("updateText"),
+                versionCard: document.getElementById("versionCard"),
+                langCard: document.getElementById("langCard"),
+                updateCard: document.getElementById("updateCard"),
+                download: document.getElementById("downloadAgent"),
+                toast: document.getElementById("toast")
+              };
+
+              function t(key, vars) {
+                var text = (I18N[lang] && I18N[lang][key]) || I18N.zh[key] || key;
+                if (vars) {
+                  Object.keys(vars).forEach(function (k) {
+                    text = text.replace(new RegExp("\\{" + k + "\\}", "g"), vars[k]);
+                  });
+                }
+                return text;
+              }
+
+              function applyI18n() {
+                document.querySelectorAll("[data-i18n]").forEach(function (el) {
+                  var key = el.getAttribute("data-i18n");
+                  el.textContent = t(key);
+                });
+                document.documentElement.lang = lang === "zh" ? "zh-CN" : "en";
+                document.querySelectorAll(".lang-switch button").forEach(function (btn) {
+                  btn.classList.toggle("active", btn.getAttribute("data-lang") === lang);
+                });
+              }
+
+              function setState(card, state) {
+                var dot = card.querySelector(".state-dot");
+                if (dot) dot.className = "state-dot " + state;
+              }
+
+              function showToast(message) {
+                elements.toast.textContent = message;
+                elements.toast.classList.add("show");
+                clearTimeout(showToast.timer);
+                showToast.timer = setTimeout(function () {
+                  elements.toast.classList.remove("show");
+                }, 3200);
+              }
+
+              function formatTime(iso) {
+                if (!iso) return "";
+                var d = new Date(iso);
+                return isFinite(d.getTime()) ? d.toLocaleString() : String(iso);
+              }
+
+              async function loadManifest() {
+                for (var i = 0; i < MANIFEST_URLS.length; i++) {
+                  try {
+                    var res = await fetch(MANIFEST_URLS[i] + "?t=" + Date.now(), { cache: "no-store" });
+                    if (!res.ok) continue;
+                    var data = await res.json();
+                    if (data && typeof data === "object") return data;
+                  } catch (e) { }
+                }
+                return null;
+              }
+
+              async function refresh() {
+                elements.versionText.textContent = t("loading");
+                elements.langText.textContent = t("loading");
+                elements.updateText.textContent = t("loading");
+                setState(elements.versionCard, "checking");
+                setState(elements.langCard, "muted");
+                setState(elements.updateCard, "muted");
+
+                var manifest = await loadManifest();
+                if (!manifest) {
+                  elements.versionText.textContent = t("loadFail");
+                  elements.langText.textContent = t("loadFail");
+                  elements.updateText.textContent = t("loadFail");
+                  setState(elements.versionCard, "muted");
+                  return;
+                }
+
+                var app = manifest.app || {};
+                var langInfo = manifest.lang || {};
+                var sizeText = app.size ? (app.size / 1048576).toFixed(1) + " MB" : t("sizeUnknown");
+                var entries = app.langEntries || langInfo.entries || "";
+                elements.langText.textContent = entries
+                  ? t("langVersionText", { v: langInfo.version || "?", n: entries })
+                  : (langInfo.version || "?");
+                elements.updateText.textContent = formatTime(langInfo.updatedAt || app.updatedAt || "");
+                setState(elements.versionCard, "ok");
+                setState(elements.langCard, "ok");
+                setState(elements.updateCard, "ok");
+
+                if (app.url) elements.download.href = app.url;
+                else elements.download.href = "https://github.com/antapp-cc/pi-lang-pack/releases/latest";
+              }
+
+              document.querySelectorAll(".lang-switch button").forEach(function (btn) {
+                btn.addEventListener("click", function () {
+                  var next = btn.getAttribute("data-lang");
+                  if (!I18N[next] || next === lang) return;
+                  lang = next;
+                  try { localStorage.setItem("pilang.assistant.lang", lang); } catch (e) { }
+                  applyI18n();
+                  refresh();
+                  showToast(t("toastLang"));
+                });
+              });
+
+              applyI18n();
+              refresh();
+            })();
+          </script>
+        </body>
+        </html>
+        EOF
+        nginx -g 'daemon off;'
