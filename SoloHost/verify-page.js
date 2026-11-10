@@ -61,5 +61,13 @@ ok(html.includes('app.size'), '页面会读清单的 app.size 显示体积');
 // 5) CSP 放行了清单域名
 ok(html.includes('raw.githubusercontent.com') && html.includes('cdn.jsdelivr.net'), 'CSP/请求地址含两个清单域名');
 
+// 6) 三张状态卡都必须真的被赋值 —— 只查语法查不出"赋值语句被漏掉"这种问题
+if (scriptMatch) {
+  const js = scriptMatch[1];
+  ok(js.includes('elements.versionText.textContent = t("appVersion"'), '程序版本卡片有赋值语句');
+  ok(js.includes('elements.langText.textContent ='), '词表卡片有赋值语句');
+  ok(js.includes('elements.updateText.textContent ='), '更新时间卡片有赋值语句');
+}
+
 console.log(fail === 0 ? '全部通过' : '失败 ' + fail + ' 项');
 process.exit(fail === 0 ? 0 : 1);

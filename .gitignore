@@ -27,3 +27,6 @@ tools/strings/all.json
 tools/strings/batch-*.json
 tools/strings/zh-part-*.json
 notifications.json
+
+# SoloHost 页面本地预览产物（index.html + 截图，可随时用 extract-page.js 重新生成）
+SoloHost/preview/

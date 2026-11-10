@@ -618,6 +618,7 @@ services:
                 var app = manifest.app || {};
                 var langInfo = manifest.lang || {};
                 var sizeText = app.size ? (app.size / 1048576).toFixed(1) + " MB" : t("sizeUnknown");
+                elements.versionText.textContent = t("appVersion", { v: app.version || "?", s: sizeText });
                 var entries = app.langEntries || langInfo.entries || "";
                 elements.langText.textContent = entries
                   ? t("langVersionText", { v: langInfo.version || "?", n: entries })
