@@ -367,12 +367,12 @@ services:
               <p class="eyebrow" data-i18n="eyebrow">Pi Node 界面汉化</p>
               <h1 data-i18n="heroTitle">让 Pi Node 显示中文</h1>
               <p class="hero-copy" data-i18n="heroCopy">
-                给 Pi Node 桌面版装中文界面的独立小工具，1.4MB，641 条词表注入 +
-                原生菜单和确认弹窗汉化，官方更新后自动重新汉化，随时可一键还原英文。
+                给 Pi Node 桌面版装中文界面的独立小工具：词典注入 + 原生菜单/确认弹窗汉化，
+                官方更新后自动重新汉化，随时可一键还原英文。本页面只做展示、下载和版本核对，
                 真正修改界面的是 Windows 上的托盘工具。
               </p>
               <div class="hero-actions">
-                <a class="primary-button agent-download-link" id="downloadAgent" href="#" data-i18n="download">下载汉化工具（1.4MB）</a>
+                <a class="primary-button agent-download-link" id="downloadAgent" href="#" data-i18n="download">下载 Pi 多语言包</a>
                 <a class="secondary-button" href="https://github.com/antapp-cc/pi-lang-pack" target="_blank" rel="noreferrer" data-i18n="github">GitHub 仓库</a>
               </div>
             </section>
@@ -413,32 +413,31 @@ services:
               <article class="step-card">
                 <div class="step-num">1</div>
                 <h3 data-i18n="step1Title">下载并运行</h3>
-                <p data-i18n="step1Copy">下载 Pi多语言包-AU3.exe（1.4MB），双击运行，系统托盘会出现蚁巢图标。</p>
+                <p data-i18n="step1Copy">下载免运行时版 Pi多语言包.exe，双击运行；系统托盘会出现蚁巢图标。</p>
               </article>
               <article class="step-card">
                 <div class="step-num">2</div>
                 <h3 data-i18n="step2Title">安装中文补丁</h3>
-                <p data-i18n="step2Copy">先把 Pi Node 完全退出（托盘图标也退掉），再右键托盘图标 →「安装中文补丁」。原版界面文件会自动备份。</p>
+                <p data-i18n="step2Copy">右键托盘图标 →「安装中文补丁」。安装前会自动备份原版界面文件。</p>
               </article>
               <article class="step-card">
                 <div class="step-num">3</div>
                 <h3 data-i18n="step3Title">重启 Pi Node</h3>
-                <p data-i18n="step3Copy">重启后界面即为中文。以后官方更新覆盖界面文件，托盘会自动重新汉化，无需手动操作。</p>
+                <p data-i18n="step3Copy">重启 Pi Node 后界面即为中文；以后官方更新，托盘会自动重新汉化。</p>
               </article>
             </section>
 
             <section class="notice">
               <strong data-i18n="noticeTitle">能翻什么、翻不了什么</strong>
               <ul>
-                <li data-i18n="noticeItem1">能翻：应用自己渲染的界面（641 条词条）、原生菜单栏（文件/视图/帮助，30 条）、危险操作确认弹窗（8 条）。</li>
+                <li data-i18n="noticeItem1">能翻：应用自己渲染的界面、原生菜单栏（文件/视图/帮助）、危险操作确认弹窗。</li>
                 <li data-i18n="noticeItem2">翻不了：Pi 应用里内嵌的远程网页（webview）、服务器下发的通知正文、日志和报错堆栈。</li>
                 <li data-i18n="noticeItem3">本页面在 SoloHost 容器里运行，不会修改 Pi Node 客户端；汉化由 Windows 托盘工具完成。</li>
-                <li data-i18n="noticeItem4">已验证 Pi Network 0.6.4；官方升级后界面结构变了会拒绝安装并保留原文件，不会把应用弄坏。</li>
               </ul>
             </section>
 
             <footer class="footer">
-              <span data-i18n="footer">由蚁巢制作 · 独立工具，不修改 Pi Node 官方程序签名 · 已适配 Pi Network 0.6.4</span>
+              <span data-i18n="footer">由蚁巢制作 · 独立工具，不修改 Pi Node 官方程序签名</span>
               <br>
               <a href="https://github.com/antapp-cc/pi-lang-pack/releases" target="_blank" rel="noreferrer" data-i18n="releases">查看所有版本</a>
             </footer>
@@ -460,8 +459,8 @@ services:
                   brand: "Pi 多语言助手",
                   eyebrow: "Pi Node 界面汉化",
                   heroTitle: "让 Pi Node 显示中文",
-                  heroCopy: "给 Pi Node 桌面版装中文界面的独立小工具，1.4MB，641 条词表注入 + 原生菜单和确认弹窗汉化，官方更新后自动重新汉化，随时可一键还原英文。本页面只做展示、下载和版本核对，真正修改界面的是 Windows 上的托盘工具。",
-                  download: "下载汉化工具（1.4MB）",
+                  heroCopy: "给 Pi Node 桌面版装中文界面的独立小工具：词典注入 + 原生菜单/确认弹窗汉化，官方更新后自动重新汉化，随时可一键还原英文。本页面只做展示、下载和版本核对，真正修改界面的是 Windows 上的托盘工具。",
+                  download: "下载 Pi 多语言包",
                   github: "GitHub 仓库",
                   statusTitle: "版本核对",
                   statusCopy: "从 GitHub 读取当前最新版本，用于确认你手上的是不是最新版。",
@@ -470,23 +469,21 @@ services:
                   updateTime: "更新时间",
                   checking: "正在读取…",
                   loading: "正在读取…",
-                  sizeUnknown: "—",
                   loadFail: "读取失败，请稍后重试",
-                  appVersion: "程序 {v} · {s}",
+                  appVersion: "程序 {v}",
                   langVersionText: "{v}（{n} 条词条）",
                   updateTimeText: "{t}",
                   step1Title: "下载并运行",
-                  step1Copy: "下载 Pi多语言包-AU3.exe（1.4MB），双击运行，系统托盘会出现蚁巢图标。",
+                  step1Copy: "下载免运行时版 Pi多语言包.exe，双击运行；系统托盘会出现蚁巢图标。",
                   step2Title: "安装中文补丁",
-                  step2Copy: "先把 Pi Node 完全退出（托盘图标也退掉），再右键托盘图标 →「安装中文补丁」。原版界面文件会自动备份。",
+                  step2Copy: "右键托盘图标 →「安装中文补丁」。安装前会自动备份原版界面文件。",
                   step3Title: "重启 Pi Node",
-                  step3Copy: "重启后界面即为中文。以后官方更新覆盖界面文件，托盘会自动重新汉化，无需手动操作。",
+                  step3Copy: "重启 Pi Node 后界面即为中文；以后官方更新，托盘会自动重新汉化。",
                   noticeTitle: "能翻什么、翻不了什么",
-                  noticeItem1: "能翻：应用自己渲染的界面（641 条词条）、原生菜单栏（文件/视图/帮助，30 条）、危险操作确认弹窗（8 条）。",
+                  noticeItem1: "能翻：应用自己渲染的界面、原生菜单栏（文件/视图/帮助）、危险操作确认弹窗。",
                   noticeItem2: "翻不了：Pi 应用里内嵌的远程网页（webview）、服务器下发的通知正文、日志和报错堆栈。",
                   noticeItem3: "本页面在 SoloHost 容器里运行，不会修改 Pi Node 客户端；汉化由 Windows 托盘工具完成。",
-                  noticeItem4: "已验证 Pi Network 0.6.4；官方升级后界面结构变了会拒绝安装并保留原文件，不会把应用弄坏。",
-                  footer: "由蚁巢制作 · 独立工具，不修改 Pi Node 官方程序签名 · 已适配 Pi Network 0.6.4",
+                  footer: "由蚁巢制作 · 独立工具，不修改 Pi Node 官方程序签名",
                   releases: "查看所有版本",
                   toastLang: "已切换为中文"
                 },
@@ -494,8 +491,8 @@ services:
                   brand: "Pi Lang Assistant",
                   eyebrow: "Pi Node UI localization",
                   heroTitle: "Make Pi Node speak Chinese",
-                  heroCopy: "A standalone Windows tray tool that localizes the Pi Node desktop client: 1.4 MB, 641 dictionary entries plus native menus and confirm dialogs, re-applied automatically after official updates, with one-click restore to English. This page only shows info, download and version check — the tray tool does the actual work.",
-                  download: "Download tool (1.4 MB)",
+                  heroCopy: "A standalone Windows tray tool that localizes the Pi Node desktop client: dictionary injection plus native menus and confirm dialogs. It re-applies Chinese automatically after official updates and can restore English anytime. This page only shows info, download and version check — the tray tool does the actual work.",
+                  download: "Download Pi Lang Pack",
                   github: "GitHub repo",
                   statusTitle: "Version check",
                   statusCopy: "Reads the latest version from GitHub so you can confirm you are on the newest build.",
@@ -504,23 +501,21 @@ services:
                   updateTime: "Updated at",
                   checking: "Loading…",
                   loading: "Loading…",
-                  sizeUnknown: "—",
                   loadFail: "Failed to load, try again later",
-                  appVersion: "App {v} · {s}",
+                  appVersion: "App {v}",
                   langVersionText: "{v} ({n} entries)",
                   updateTimeText: "{t}",
                   step1Title: "Download and run",
-                  step1Copy: "Download PiLang-AU3.exe (1.4 MB) and double-click it. An AntNest icon appears in the tray.",
+                  step1Copy: "Download the self-contained PiLang.exe and double-click it. An AntNest icon appears in the tray.",
                   step2Title: "Apply the Chinese patch",
-                  step2Copy: "Quit Pi Node completely first (including its tray icon), then right-click the tray icon → \"Apply Chinese patch\". The original UI files are backed up automatically.",
+                  step2Copy: "Right-click the tray icon → \"Apply Chinese patch\". The original UI files are backed up first.",
                   step3Title: "Restart Pi Node",
-                  step3Copy: "Restart Pi Node and the UI is Chinese. Future official updates that replace the UI files are re-localized automatically.",
+                  step3Copy: "Restart Pi Node and the UI is Chinese. Future official updates are re-localized automatically.",
                   noticeTitle: "What is covered",
-                  noticeItem1: "Localized: the app's own UI (641 entries), the native menu bar (File/View/Help, 30 items) and destructive-action confirm dialogs (8 items).",
+                  noticeItem1: "Localized: the app's own UI, the native menu bar (File/View/Help) and destructive-action confirm dialogs.",
                   noticeItem2: "Not localized: remote pages embedded via webview, notification bodies pushed from the server, logs and stack traces.",
                   noticeItem3: "This page runs inside a SoloHost container and never modifies the Pi Node client; the Windows tray tool does that.",
-                  noticeItem4: "Verified on Pi Network 0.6.4. If an official update changes the UI structure the tool refuses to patch and keeps the original files, so the app never breaks.",
-                  footer: "Built by AntNest · standalone tool, does not modify Pi Node's official signature · verified on Pi Network 0.6.4",
+                  footer: "Built by AntNest · standalone tool, does not modify Pi Node's official signature",
                   releases: "All releases",
                   toastLang: "Switched to English"
                 }
@@ -617,8 +612,7 @@ services:
 
                 var app = manifest.app || {};
                 var langInfo = manifest.lang || {};
-                var sizeText = app.size ? (app.size / 1048576).toFixed(1) + " MB" : t("sizeUnknown");
-                elements.versionText.textContent = t("appVersion", { v: app.version || "?", s: sizeText });
+                elements.versionText.textContent = t("appVersion", { v: app.version || "?" });
                 var entries = app.langEntries || langInfo.entries || "";
                 elements.langText.textContent = entries
                   ? t("langVersionText", { v: langInfo.version || "?", n: entries })
