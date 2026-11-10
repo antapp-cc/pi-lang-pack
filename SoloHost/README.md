@@ -15,7 +15,7 @@
 - 标签 `pi.ui.primary: "true"`，会被 Pi 识别为主 UI 应用。
 
 页面本身**不会修改 Pi Node 客户端** —— 汉化由 Windows 上的托盘工具完成
-（`Pi多语言包-AU3.exe`，1.4MB 免运行时；C# 版 `PiLang.exe` 51.8MB 也还在 Release 里）。
+（`Pi多语言包-AU3.exe`，1.4MB；C# 版 `PiLang.exe` 51.8MB 也还在 Release 里）。
 
 ## 目录
 

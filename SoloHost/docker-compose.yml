@@ -367,7 +367,7 @@ services:
               <p class="eyebrow" data-i18n="eyebrow">Pi Node 界面汉化</p>
               <h1 data-i18n="heroTitle">让 Pi Node 显示中文</h1>
               <p class="hero-copy" data-i18n="heroCopy">
-                给 Pi Node 桌面版装中文界面的独立小工具，1.4MB 免运行时：641 条词表注入 +
+                给 Pi Node 桌面版装中文界面的独立小工具，1.4MB，641 条词表注入 +
                 原生菜单和确认弹窗汉化，官方更新后自动重新汉化，随时可一键还原英文。
                 真正修改界面的是 Windows 上的托盘工具。
               </p>
@@ -413,7 +413,7 @@ services:
               <article class="step-card">
                 <div class="step-num">1</div>
                 <h3 data-i18n="step1Title">下载并运行</h3>
-                <p data-i18n="step1Copy">下载 Pi多语言包-AU3.exe（1.4MB，免运行时），双击运行，系统托盘会出现蚁巢图标。</p>
+                <p data-i18n="step1Copy">下载 Pi多语言包-AU3.exe（1.4MB），双击运行，系统托盘会出现蚁巢图标。</p>
               </article>
               <article class="step-card">
                 <div class="step-num">2</div>
@@ -460,7 +460,7 @@ services:
                   brand: "Pi 多语言助手",
                   eyebrow: "Pi Node 界面汉化",
                   heroTitle: "让 Pi Node 显示中文",
-                  heroCopy: "给 Pi Node 桌面版装中文界面的独立小工具，1.4MB 免运行时：641 条词表注入 + 原生菜单和确认弹窗汉化，官方更新后自动重新汉化，随时可一键还原英文。本页面只做展示、下载和版本核对，真正修改界面的是 Windows 上的托盘工具。",
+                  heroCopy: "给 Pi Node 桌面版装中文界面的独立小工具，1.4MB，641 条词表注入 + 原生菜单和确认弹窗汉化，官方更新后自动重新汉化，随时可一键还原英文。本页面只做展示、下载和版本核对，真正修改界面的是 Windows 上的托盘工具。",
                   download: "下载汉化工具（1.4MB）",
                   github: "GitHub 仓库",
                   statusTitle: "版本核对",
@@ -470,13 +470,13 @@ services:
                   updateTime: "更新时间",
                   checking: "正在读取…",
                   loading: "正在读取…",
-                  sizeUnknown: "免运行时",
+                  sizeUnknown: "—",
                   loadFail: "读取失败，请稍后重试",
                   appVersion: "程序 {v} · {s}",
                   langVersionText: "{v}（{n} 条词条）",
                   updateTimeText: "{t}",
                   step1Title: "下载并运行",
-                  step1Copy: "下载 Pi多语言包-AU3.exe（1.4MB，免运行时），双击运行，系统托盘会出现蚁巢图标。",
+                  step1Copy: "下载 Pi多语言包-AU3.exe（1.4MB），双击运行，系统托盘会出现蚁巢图标。",
                   step2Title: "安装中文补丁",
                   step2Copy: "先把 Pi Node 完全退出（托盘图标也退掉），再右键托盘图标 →「安装中文补丁」。原版界面文件会自动备份。",
                   step3Title: "重启 Pi Node",
@@ -494,7 +494,7 @@ services:
                   brand: "Pi Lang Assistant",
                   eyebrow: "Pi Node UI localization",
                   heroTitle: "Make Pi Node speak Chinese",
-                  heroCopy: "A standalone Windows tray tool that localizes the Pi Node desktop client: 1.4 MB, no runtime required. 641 dictionary entries plus native menus and confirm dialogs, re-applied automatically after official updates, with one-click restore to English. This page only shows info, download and version check — the tray tool does the actual work.",
+                  heroCopy: "A standalone Windows tray tool that localizes the Pi Node desktop client: 1.4 MB, 641 dictionary entries plus native menus and confirm dialogs, re-applied automatically after official updates, with one-click restore to English. This page only shows info, download and version check — the tray tool does the actual work.",
                   download: "Download tool (1.4 MB)",
                   github: "GitHub repo",
                   statusTitle: "Version check",
@@ -504,13 +504,13 @@ services:
                   updateTime: "Updated at",
                   checking: "Loading…",
                   loading: "Loading…",
-                  sizeUnknown: "no runtime",
+                  sizeUnknown: "—",
                   loadFail: "Failed to load, try again later",
                   appVersion: "App {v} · {s}",
                   langVersionText: "{v} ({n} entries)",
                   updateTimeText: "{t}",
                   step1Title: "Download and run",
-                  step1Copy: "Download PiLang-AU3.exe (1.4 MB, no runtime needed) and double-click it. An AntNest icon appears in the tray.",
+                  step1Copy: "Download PiLang-AU3.exe (1.4 MB) and double-click it. An AntNest icon appears in the tray.",
                   step2Title: "Apply the Chinese patch",
                   step2Copy: "Quit Pi Node completely first (including its tray icon), then right-click the tray icon → \"Apply Chinese patch\". The original UI files are backed up automatically.",
                   step3Title: "Restart Pi Node",
